@@ -14,4 +14,4 @@ bodybuilding, Weight Gain, Weight loss & other Fitness Workout as your bodybuild
 - Notification screen UI.
 - Custom widgets, clean code.
 
-![Preview](fitness_app.png)
+<!-- ![Preview](fitness_app.png) -->
