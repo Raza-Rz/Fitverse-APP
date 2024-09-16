@@ -1,4 +1,4 @@
-# fitnessapp
+<!-- # fitnessapp
  
 Fitness workout app is a professional app template that provides pre-set workout plans for
 bodybuilding, Weight Gain, Weight loss & other Fitness Workout as your bodybuilding and Workout trainer.
@@ -12,6 +12,6 @@ bodybuilding, Weight Gain, Weight loss & other Fitness Workout as your bodybuild
 - Progress photo gallery UI.
 - Profile screen UI.
 - Notification screen UI.
-- Custom widgets, clean code.
+- Custom widgets, clean code. -->
 
 <!-- ![Preview](fitness_app.png) -->
