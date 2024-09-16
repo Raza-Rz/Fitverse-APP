@@ -1,0 +1,146 @@
+class LoginScreen extends StatefulWidget {
+  static String routeName = "/LoginScreen";
+  const LoginScreen({Key? key}) : super(key: key);
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  // Regular expression for password validation
+  final RegExp passwordRegExp = RegExp(r'^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$');
+
+  void _login() {
+    if (_formKey.currentState!.validate()) {
+      // Perform your login authentication here (e.g., Firebase Auth)
+      String email = _emailController.text;
+      String password = _passwordController.text;
+
+      // Simulate login success
+      if (email == "test@example.com" && password == "Password1") {
+        // Navigate to the complete profile screen on successful login
+        Navigator.pushNamed(context, CompleteProfileScreen.routeName);
+      } else {
+        // Show error if login fails
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invalid email or password')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var media = MediaQuery.of(context).size;
+    return Scaffold(
+      backgroundColor: AppColors.whiteColor,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 200, horizontal: 25),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: media.width,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: media.width * 0.03,
+                        ),
+                        const Text(
+                          "Hey there,",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.blackColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        SizedBox(height: media.width * 0.01),
+                        const Text(
+                          "Welcome Back",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.blackColor,
+                            fontSize: 20,
+                            fontFamily: "Poppins",
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: media.width * 0.05),
+                  RoundTextField(
+                    controller: _emailController,
+                    hintText: "Email",
+                    icon: "assets/icons/message_icon.png",
+                    textInputType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email';
+                      } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                        return 'Please enter a valid email';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: media.width * 0.05),
+                  RoundTextField(
+                    controller: _passwordController,
+                    hintText: "Password",
+                    icon: "assets/icons/lock_icon.png",
+                    textInputType: TextInputType.text,
+                    isObscureText: true,
+                    rightIcon: TextButton(
+                      onPressed: () {},
+                      child: Container(
+                        alignment: Alignment.center,
+                        width: 20,
+                        height: 20,
+                        child: Image.asset(
+                          "assets/icons/hide_pwd_icon.png",
+                          width: 20,
+                          height: 20,
+                          fit: BoxFit.contain,
+                          color: AppColors.grayColor,
+                        ),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      } else if (!passwordRegExp.hasMatch(value)) {
+                        return 'Password must contain 1 uppercase letter, 1 number, and be at least 8 characters long';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: media.width * 0.03),
+                  const Text("Forgot your password?",
+                      style: TextStyle(
+                        color: AppColors.grayColor,
+                        fontSize: 10,
+                      )),
+                  SizedBox(height: media.width * 0.05),
+                  RoundGradientButton(
+                    title: "Login",
+                    onPressed: _login,
+                  ),
+                  // Rest of your code remains the same
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

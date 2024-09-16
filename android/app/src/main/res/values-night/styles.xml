@@ -1,0 +1,24 @@
+<resources>
+    <!-- Theme applied to the Android Window while the process is starting -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <!-- Set the background color of the splash screen -->
+        <item name="android:windowSplashScreenBackground">@android:color/white</item> <!-- Adjust to your desired background color -->
+
+        <!-- Remove animated icon property to avoid circular crop -->
+        <!-- <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_background</item> --> 
+
+        <!-- Use a full-screen drawable instead -->
+        <item name="android:windowBackground">@drawable/splash_background</item>
+
+        <!-- Ensure no background for icon -->
+        <item name="android:windowSplashScreenIconBackgroundColor">@android:color/transparent</item> 
+
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+    <!-- Theme applied to the Android Window as soon as the process has started -->
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>
