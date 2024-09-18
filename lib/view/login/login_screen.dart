@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../common_widgets/round_gradient_button.dart';
 import '../../common_widgets/round_textfield.dart';
 import '../profile/complete_profile_screen.dart';
+import 'package:fitverse/view/login/forgot_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static String routeName = "/LoginScreen";
@@ -129,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
+                        return 'Please enter your password'; 
                       } else if (!passwordRegExp.hasMatch(value)) {
                         return 'Password must contain 1 uppercase letter, 1 number, and be at least 8 characters long';
                       }
@@ -137,11 +138,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                   SizedBox(height: media.width * 0.03),
-                  const Text("Forgot your password?",
+                   TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, ForgotPasswordScreen.routeName);
+                      },
+                      child: const Text("Forgot your password?",
                       style: TextStyle(
                         color: AppColors.grayColor,
                         fontSize: 10,
-                      )),
+                      )
+                     ),),
                   SizedBox(height: media.width * 0.05),
                   RoundGradientButton(
                     title: "Login",

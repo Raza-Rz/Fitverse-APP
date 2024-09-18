@@ -2,6 +2,7 @@
 import 'package:fitverse/view/activity_tracker/activity_tracker_screen.dart';
 import 'package:fitverse/view/dashboard/dashboard_screen.dart';
 import 'package:fitverse/view/finish_workout/finish_workout_screen.dart';
+import 'package:fitverse/view/login/forgot_screen.dart';
 import 'package:fitverse/view/login/login_screen.dart';
 import 'package:fitverse/view/notification/notification_screen.dart';
 import 'package:fitverse/view/on_boarding/on_boarding_screen.dart';
@@ -31,7 +32,7 @@ final Map<String, WidgetBuilder> routes = {
   DashboardScreen.routeName: (context) => const DashboardScreen(),
   
   WorkoutScreen.routeName: (context) => const WorkoutScreen(),
-
+  ForgotPasswordScreen.routeName:(context) =>const ForgotPasswordScreen(),
   FinishWorkoutScreen.routeName: (context) => const FinishWorkoutScreen(),
   NotificationScreen.routeName: (context) => const NotificationScreen(),
   ActivityTrackerScreen.routeName: (context) => const ActivityTrackerScreen(),
