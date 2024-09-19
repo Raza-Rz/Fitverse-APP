@@ -1,9 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitverse/utils/app_colors.dart';
 import 'package:fitverse/view/activity/workout_screen.dart';
 import 'package:fitverse/view/dashboard/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fitverse/view/profile/edit_profile.dart';
 import '../login/login_screen.dart';
+
 class RefinedProfileScreen extends StatelessWidget {
   static String routeName = "/RefinedProfileScreen";
 
@@ -11,13 +14,15 @@ class RefinedProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final User? user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
-      backgroundColor: Colors.transparent, // Set background color to white
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           // Gradient background for the upper body
           Container(
-            height: 250,  // Adjust height to cover only upper part
+            height: 250,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topRight,
@@ -52,7 +57,7 @@ class RefinedProfileScreen extends StatelessWidget {
                         child: Row(
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.arrow_back, color: Colors.white), // Back button color
+                              icon: const Icon(Icons.arrow_back, color: Colors.white),
                               onPressed: () => Navigator.pushNamed(context, DashboardScreen.routeName),
                             ),
                             const Expanded(
@@ -60,89 +65,89 @@ class RefinedProfileScreen extends StatelessWidget {
                                 child: Text(
                                   'My Profile',
                                   style: TextStyle(
-                                    color: Colors.white, // Title text color
+                                    color: Colors.white,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 48), // Placeholder to align title center
+                            const SizedBox(width: 48),
                           ],
                         ),
                       ),
                     ),
                     // Profile header content
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            radius: 50,
-                            backgroundColor: Colors.white,
-                            backgroundImage: AssetImage('assets/images/profile.jpg'), // Profile picture
+                    FutureBuilder<DocumentSnapshot>(
+                      future: FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(user?.uid)
+                          .get(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+
+                        if (snapshot.hasError) {
+                          return Center(child: Text('Error: ${snapshot.error}'));
+                        }
+
+                        if (!snapshot.hasData || !snapshot.data!.exists) {
+                          return Center(child: Text('No user data found.'));
+                        }
+
+                        final userData = snapshot.data!.data() as Map<String, dynamic>;
+                        final firstName = userData['firstName'] ?? 'User';
+                        final lastName = userData['lastName'] ?? '';
+
+                        return Container(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Column(
+                            children: [
+                              CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.white, // Solid color background
+              child: Icon(Icons.person, color: AppColors.primaryColor2, size: 40), // Placeholder icon
+            ),
+                              const SizedBox(height: 10),
+                              Text(
+                                '$firstName $lastName',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Text(
+                                "Lose a Fat Program",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                            ],
                           ),
-                          const SizedBox(height: 10),
-                          const Text(
-                            'Anus',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Text(
-                            "Lose a Fat Program",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          // Padding(
-                          //   padding: const EdgeInsets.symmetric(horizontal: 0),
-                          //   child: Row(
-                          //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          //     children: [
-                          //       // infoCard('Lose Fat Program', ''),
-                          //       // infoCard('28', 'Years Old'),
-                          //       // infoCard('5.5ft', 'Height'),
-                          //     ],
-                          //   ),
-                          // ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 30),
-              // Lower body section with white background and rounded upper corners
               Expanded(
-                
                 child: Container(
                   transform: Matrix4.translationValues(0.0, -50.0, 0.0),
-                  // padding: const EdgeInsets.symmetric(horizontal: 20),
-                  // margin: const EdgeInsets.only(top: -5),
                   decoration: const BoxDecoration(
-                    
                     color: Colors.white,
                     borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(30), // Rounded upper corners
+                      top: Radius.circular(30),
                     ),
-                    boxShadow: [
-                      // Shadow to create depth and separation effect
-                      // BoxShadow(
-                      //   color: Colors.black12,
-                      //   spreadRadius: 2,
-                      //   blurRadius: 10,
-                      // ),
-                    ],
                   ),
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20.0), // Added padding for spacing
-                      child: menuList(context), // Pass context to menuList
+                      padding: const EdgeInsets.symmetric(vertical: 20.0),
+                      child: menuList(context),
                     ),
                   ),
                 ),
@@ -154,30 +159,7 @@ class RefinedProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget infoCard(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white, // Text color
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white60, // Subtext color
-            fontSize: 14,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget menuList(BuildContext context) { // Accept context parameter
+  Widget menuList(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -186,9 +168,7 @@ class RefinedProfileScreen extends StatelessWidget {
             Navigator.pushNamed(context, EditProfileScreen.routeName);
           }),
           menuItem(Icons.star, 'Favorite', () {
-            // Example of navigation
-           Navigator.pushNamed(context, WorkoutScreen.routeName);
-
+            Navigator.pushNamed(context, WorkoutScreen.routeName);
           }),
           menuItem(Icons.privacy_tip, 'Privacy Policy', () {
             Navigator.pushNamed(context, '/privacy');
@@ -212,7 +192,7 @@ class RefinedProfileScreen extends StatelessWidget {
       color: Colors.white,
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: AppColors.primaryColor1, // Purple background for icon
+          backgroundColor: AppColors.primaryColor2,
           child: Icon(icon, color: Colors.white),
         ),
         title: Text(
@@ -223,7 +203,7 @@ class RefinedProfileScreen extends StatelessWidget {
           ),
         ),
         trailing: const Icon(Icons.arrow_forward_ios, color: Color.fromARGB(255, 204, 204, 204)),
-        onTap: onTap, // Call the onTap callback
+        onTap: onTap,
       ),
     );
   }

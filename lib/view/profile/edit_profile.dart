@@ -1,25 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fitverse/utils/app_colors.dart';
 import 'package:fitverse/common_widgets/round_gradient_button.dart';
-
-// Define a UserProfile class to manage user data
-class UserProfile {
-  String fullName;
-  String email;
-  String mobileNumber;
-  String dateOfBirth;
-  String weight;
-  String height;
-
-  UserProfile({
-    required this.fullName,
-    required this.email,
-    required this.mobileNumber,
-    required this.dateOfBirth,
-    required this.weight,
-    required this.height,
-  });
-}
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class EditProfileScreen extends StatefulWidget {
   static String routeName = "/EditProfileScreen";
@@ -31,75 +14,83 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  // Initialize user data
-  final UserProfile userProfile = UserProfile(
-    fullName: 'M.Anus',
-    email: 'guestuser@gmail.com',
-    mobileNumber: '+123 567 89000',
-    dateOfBirth: '01 / 04 / 2000',
-    weight: '75 Kg',
-    height: '5.5 ft',
-  );
+  TextEditingController? fullNameController;
+  TextEditingController? emailController;
+  TextEditingController? weightController;
+  TextEditingController? heightController;
 
-  // Define controllers for the TextFields
-  late TextEditingController fullNameController;
-  late TextEditingController emailController;
-  late TextEditingController mobileNumberController;
-  late TextEditingController dateOfBirthController;
-  late TextEditingController weightController;
-  late TextEditingController heightController;
+  String? firstName;
+  String? lastName;
+  String? email;
+  String? weight;
+  String? height;
 
   @override
   void initState() {
     super.initState();
+    _initializeControllers();
+  }
 
-    // Initialize controllers with existing user data
-    fullNameController = TextEditingController(text: userProfile.fullName);
-    emailController = TextEditingController(text: userProfile.email);
-    mobileNumberController = TextEditingController(text: userProfile.mobileNumber);
-    dateOfBirthController = TextEditingController(text: userProfile.dateOfBirth);
-    weightController = TextEditingController(text: userProfile.weight);
-    heightController = TextEditingController(text: userProfile.height);
+  Future<void> _initializeControllers() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          final data = userDoc.data();
+          setState(() {
+            email = data?['email'];
+            firstName = data?['firstName'];
+            lastName = data?['lastName'];
+            weight = data?['weight'];
+            height = data?['height'];
+
+            fullNameController = TextEditingController(text: '${firstName ?? ''} ${lastName ?? ''}');
+            emailController = TextEditingController(text: email ?? '');
+            weightController = TextEditingController(text: weight ?? '');
+            heightController = TextEditingController(text: height ?? '');
+          });
+        }
+      } catch (e) {
+        // Handle potential errors here
+        print('Error fetching user data: $e');
+      }
+    }
   }
 
   @override
   void dispose() {
-    // Dispose controllers when not needed
-    fullNameController.dispose();
-    emailController.dispose();
-    // mobileNumberController.dispose();
-    // dateOfBirthController.dispose();
-    weightController.dispose();
-    heightController.dispose();
+    fullNameController?.dispose();
+    emailController?.dispose();
+    weightController?.dispose();
+    heightController?.dispose();
     super.dispose();
   }
 
-  // Function to update the user profile
-  void updateUserProfile() {
-    setState(() {
-      // Update the user profile with new values
-      userProfile.fullName = fullNameController.text;
-      userProfile.email = emailController.text;
-      // userProfile.mobileNumber = mobileNumberController.text;
-      // userProfile.dateOfBirth = dateOfBirthController.text;
-      userProfile.weight = weightController.text;
-      userProfile.height = heightController.text;
-    });
+  void updateUserProfile() async {
+    if (fullNameController?.text.isNotEmpty == true && emailController?.text.isNotEmpty == true) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final nameParts = fullNameController?.text.split(' ') ?? [];
+        final firstName = nameParts.length > 1 ? nameParts.first : '';
+        final lastName = nameParts.length > 1 ? nameParts.last : fullNameController?.text ?? '';
 
-    // Here you can add the code to persist the changes to a database or an API
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+          'firstName': firstName,
+          'lastName': lastName,
+          'weight': weightController?.text ?? '',
+          'height': heightController?.text ?? '',
+        });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile Updated Successfully')),
-    );
-
-    // Navigate to another screen after updating
-    // Navigator.pushNamed(context, DashboardScreen.routeName);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile Updated Successfully')),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery.of(context).size;
-
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
       appBar: AppBar(
@@ -110,7 +101,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
-          'My Profile',
+          'Edit Profile',
           style: TextStyle(
             color: AppColors.blackColor,
             fontSize: 18,
@@ -127,36 +118,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 20),
             Stack(
               children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: AppColors.primaryColor1,
-                  // Use an image for user profile picture if needed
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: CircleAvatar(
-                    backgroundColor: AppColors.primaryColor2,
-                    radius: 12,
-                    child: const Icon(Icons.edit, size: 16, color: Colors.white),
-                  ),
-                ),
+               CircleAvatar(
+              radius: 50,
+              backgroundColor: AppColors.primaryColor2, // Solid color background
+              child: Icon(Icons.person, color: Colors.white, size: 40), // Placeholder icon
+            ),
+                // Positioned(
+                //   bottom: 0,
+                //   right: 0,
+                //   child: CircleAvatar(
+                //     backgroundColor: AppColors.primaryColor2,
+                //     radius: 12,
+                //     child: const Icon(Icons.edit, size: 16, color: Colors.white),
+                //   ),
+                // ),
               ],
             ),
             const SizedBox(height: 10),
-            const Text(
-              'M.Anus',
-              style: TextStyle(
-                color: AppColors.blackColor,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 5),
-            profileFormField('Full name', fullNameController),
-            profileFormField('Email', emailController),
-            // profileFormField('Mobile Number', mobileNumberController),
-            // profileFormField('Date of birth', dateOfBirthController),
+            profileFormField('Full Name', fullNameController),
+            profileFormField('Email', emailController, isReadOnly: true),
             profileFormField('Weight', weightController),
             profileFormField('Height', heightController),
             const SizedBox(height: 20),
@@ -174,7 +154,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget profileFormField(String label, TextEditingController controller) {
+  Widget profileFormField(String label, TextEditingController? controller, {bool isReadOnly = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -190,8 +170,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         const SizedBox(height: 5),
         TextFormField(
           controller: controller,
+          readOnly: isReadOnly,
           decoration: InputDecoration(
-            fillColor: const Color.fromARGB(255, 240, 240, 240),
+            fillColor: Colors.grey[100],
             filled: true,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(20),

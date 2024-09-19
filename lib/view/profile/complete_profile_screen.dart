@@ -1,6 +1,8 @@
+import 'package:fitverse/utils/app_colors.dart';
 import 'package:fitverse/view/welcome/welcome_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:fitverse/utils/app_colors.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../common_widgets/round_gradient_button.dart';
 import '../../common_widgets/round_textfield.dart';
 
@@ -15,15 +17,49 @@ class CompleteProfileScreen extends StatefulWidget {
 
 class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
   String? selectedGender;
+  late TextEditingController dobController;
+  late TextEditingController weightController;
+  late TextEditingController heightController;
+
+  @override
+  void initState() {
+    super.initState();
+    dobController = TextEditingController();
+    weightController = TextEditingController();
+    heightController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    dobController.dispose();
+    weightController.dispose();
+    heightController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveUserProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'dob': dobController.text,
+        'weight': weightController.text,
+        'height': heightController.text,
+        'gender': selectedGender,
+      }, SetOptions(merge: true)); // Use merge to avoid overwriting other fields
+
+      Navigator.pushNamed(context, WelcomeScreen.routeName);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(right: 15, left: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Column(
             children: [
               Image.asset("assets/images/complete_profile.png", width: media.width),
@@ -98,30 +134,30 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                 ),
               ),
               const SizedBox(height: 15),
-              const RoundTextField(
+              RoundTextField(
                 hintText: "Date of Birth",
                 icon: "assets/icons/calendar_icon.png",
                 textInputType: TextInputType.text,
+                controller: dobController,
               ),
               const SizedBox(height: 15),
-              const RoundTextField(
+              RoundTextField(
                 hintText: "Your Weight",
                 icon: "assets/icons/weight_icon.png",
                 textInputType: TextInputType.text,
+                controller: weightController,
               ),
               const SizedBox(height: 15),
-              const RoundTextField(
+              RoundTextField(
                 hintText: "Your Height",
                 icon: "assets/icons/swap_icon.png",
                 textInputType: TextInputType.text,
+                controller: heightController,
               ),
               const SizedBox(height: 15),
               RoundGradientButton(
                 title: "Next >",
-                onPressed: () {
-                  // Navigate to the next screen, e.g., YourGoalScreen
-                  Navigator.pushNamed(context, WelcomeScreen.routeName);
-                },
+                onPressed: _saveUserProfile,
               ),
             ],
           ),

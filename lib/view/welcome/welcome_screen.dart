@@ -1,13 +1,47 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitverse/utils/app_colors.dart';
-import 'package:fitverse/view/dashboard/dashboard_screen.dart';
 import 'package:flutter/material.dart';
-
 import '../../common_widgets/round_gradient_button.dart';
-
-class WelcomeScreen extends StatelessWidget {
+import 'package:fitverse/view/dashboard/dashboard_screen.dart';
+class WelcomeScreen extends StatefulWidget {
   static String routeName = "/WelcomeScreen";
 
   const WelcomeScreen({Key? key}) : super(key: key);
+
+  @override
+  _WelcomeScreenState createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  String? userName = "User";
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+  }
+
+  Future<void> _fetchUserName() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists) {
+          final data = userDoc.data();
+          setState(() {
+            userName = '${data?['firstName'] ?? 'User'}';
+          });
+        }
+      }
+    } catch (e) {
+      print('Error fetching user name: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +58,8 @@ class WelcomeScreen extends StatelessWidget {
               Image.asset("assets/images/welcome_promo.png",
                   width: media.width * 0.75, fit: BoxFit.fitWidth),
               SizedBox(height: media.width * 0.05),
-              const Text(
-                "Welcome, Anus",
+              Text(
+                "Welcome, $userName",
                 style: TextStyle(
                     color: AppColors.blackColor,
                     fontSize: 20,
