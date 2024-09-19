@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "906797658036",
+    "project_id": "fitverse-edc6e",
+    "storage_bucket": "fitverse-edc6e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:906797658036:android:da2b37fe60dfe117f4cce1",
+        "android_client_info": {
+          "package_name": "com.Rz.fitverse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCu7lzCB8LQtYXR-ncmtFVzsjWAinxwd3o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

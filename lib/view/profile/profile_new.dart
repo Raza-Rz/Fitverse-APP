@@ -1,11 +1,9 @@
-import 'package:fitverse/routes.dart';
 import 'package:fitverse/utils/app_colors.dart';
 import 'package:fitverse/view/activity/workout_screen.dart';
 import 'package:fitverse/view/dashboard/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fitverse/view/profile/edit_profile.dart';
 import '../login/login_screen.dart';
-import 'package:fitverse/view/activity/workout_screen.dart';
 class RefinedProfileScreen extends StatelessWidget {
   static String routeName = "/RefinedProfileScreen";
 

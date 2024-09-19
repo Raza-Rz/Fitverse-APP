@@ -1,16 +1,43 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../common_widgets/round_gradient_button.dart';
+
 class ForgotPasswordScreen extends StatelessWidget {
   static String routeName = "/forgotPassword";
 
-  const ForgotPasswordScreen({Key? key}) : super(key: key);
+  ForgotPasswordScreen({Key? key}) : super(key: key);
+
+  final TextEditingController _emailController = TextEditingController();
+
+  Future<void> _resetPassword(BuildContext context) async {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter your email')),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Password reset email sent')),
+      );
+      Navigator.pop(context); // Navigate back to the login screen
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to send password reset email: ${e.message}')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical:200,horizontal: 25),
+        padding: const EdgeInsets.symmetric(vertical: 200, horizontal: 25),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -41,6 +68,7 @@ class ForgotPasswordScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             TextFormField(
+              controller: _emailController,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.email),
                 hintText: 'Email',
@@ -57,9 +85,7 @@ class ForgotPasswordScreen extends StatelessWidget {
             // Using RoundGradientButton instead of ElevatedButton
             RoundGradientButton(
               title: "Reset Password",
-              onPressed: () {
-                // Your reset password logic
-              },
+              onPressed: () => _resetPassword(context),
             ),
 
             const SizedBox(height: 20),
@@ -91,40 +117,3 @@ class ForgotPasswordScreen extends StatelessWidget {
     );
   }
 }
-
-// Example RoundGradientButton Widget
-// class RoundGradientButton extends StatelessWidget {
-//   final String title;
-//   final VoidCallback onPressed;
-
-//   const RoundGradientButton({
-//     Key? key,
-//     required this.title,
-//     required this.onPressed,
-//   }) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: double.infinity,
-//       height: 50,
-//       decoration: BoxDecoration(
-//         gradient: const LinearGradient(
-//           colors: [Color(0xFF6DD5FA), Color(0xFF2980B9)], // Your gradient colors
-//         ),
-//         borderRadius: BorderRadius.circular(30),
-//       ),
-//       child: TextButton(
-//         onPressed: onPressed,
-//         child: Text(
-//           title,
-//           style: const TextStyle(
-//             fontSize: 18,
-//             color: Colors.white,
-//             fontWeight: FontWeight.bold,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

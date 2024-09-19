@@ -1,10 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitverse/utils/app_colors.dart';
+import 'package:fitverse/view/dashboard/dashboard_screen.dart';
 import 'package:fitverse/view/signup/signup_screen.dart';
+import 'package:fitverse/view/login/forgot_screen.dart';
 import 'package:flutter/material.dart';
 import '../../common_widgets/round_gradient_button.dart';
 import '../../common_widgets/round_textfield.dart';
 import '../profile/complete_profile_screen.dart';
-import 'package:fitverse/view/login/forgot_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static String routeName = "/LoginScreen";
@@ -18,26 +20,37 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
   bool _isPasswordVisible = false;
-
-  // Regular expression for password validation
   final RegExp passwordRegExp = RegExp(r'^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$');
 
-  void _login() {
+  // Method to handle Firebase login
+  void _login() async {
     if (_formKey.currentState!.validate()) {
-      // Perform your login authentication here (e.g., Firebase Auth)
-      String email = _emailController.text;
-      String password = _passwordController.text;
+      String email = _emailController.text.trim();
+      String password = _passwordController.text.trim();
 
-      // Simulate login success
-      if (email == "guestuser@gmail.com" && password == "Password1") {
+      try {
+        // Authenticate user with Firebase
+        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+
         // Navigate to the complete profile screen on successful login
-        Navigator.pushNamed(context, CompleteProfileScreen.routeName);
-      } else {
-        // Show error if login fails
+        Navigator.pushNamed(context, DashboardScreen.routeName);
+      } on FirebaseAuthException catch (e) {
+        // Show error message if login fails
+        String errorMessage;
+        if (e.code == 'user-not-found') {
+          errorMessage = 'No user found for that email.';
+        } else if (e.code == 'wrong-password') {
+          errorMessage = 'Wrong password provided for that user.';
+        } else {
+          errorMessage = 'An error occurred. Please try again later.';
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid email or password')),
+          SnackBar(content: Text(errorMessage)),
         );
       }
     }
@@ -110,17 +123,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     textInputType: TextInputType.text,
                     isObscureText: !_isPasswordVisible,
                     rightIcon: TextButton(
-                      onPressed: () { setState(() {
+                      onPressed: () {
+                        setState(() {
                           _isPasswordVisible = !_isPasswordVisible;
-                        });},
+                        });
+                      },
                       child: Container(
                         alignment: Alignment.center,
                         width: 20,
                         height: 20,
-                        child: Image.asset(_isPasswordVisible
-                              ? "assets/icons/show_pwd_icon.png" // Use an icon for showing password
-                              : "assets/icons/hide_pwd_icon.png", // Use an icon for hiding password
-                          
+                        child: Image.asset(
+                          _isPasswordVisible
+                              ? "assets/icons/show_pwd_icon.png"
+                              : "assets/icons/hide_pwd_icon.png",
                           width: 20,
                           height: 20,
                           fit: BoxFit.contain,
@@ -130,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your password'; 
+                        return 'Please enter your password';
                       } else if (!passwordRegExp.hasMatch(value)) {
                         return 'Password must contain 1 uppercase letter, 1 number, and be at least 8 characters long';
                       }
@@ -138,16 +153,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                   SizedBox(height: media.width * 0.03),
-                   TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, ForgotPasswordScreen.routeName);
-                      },
-                      child: const Text("Forgot your password?",
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, ForgotPasswordScreen.routeName);
+                    },
+                    child: const Text(
+                      "Forgot your password?",
                       style: TextStyle(
                         color: AppColors.grayColor,
                         fontSize: 10,
-                      )
-                     ),),
+                      ),
+                    ),
+                  ),
                   SizedBox(height: media.width * 0.05),
                   RoundGradientButton(
                     title: "Login",
@@ -157,27 +174,30 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     children: [
                       Expanded(
-                          child: Container(
-                        width: double.maxFinite,
-                        height: 1,
-                        color: AppColors.grayColor.withOpacity(0.5),
-                      )),
-                      Text("  Or  ",
-                          style: TextStyle(
-                              color: AppColors.grayColor,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400)),
+                        child: Container(
+                          width: double.maxFinite,
+                          height: 1,
+                          color: AppColors.grayColor.withOpacity(0.5),
+                        ),
+                      ),
+                      Text(
+                        "  Or  ",
+                        style: TextStyle(
+                          color: AppColors.grayColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
                       Expanded(
-                          child: Container(
-                        width: double.maxFinite,
-                        height: 1,
-                        color: AppColors.grayColor.withOpacity(0.5),
-                      )),
+                        child: Container(
+                          width: double.maxFinite,
+                          height: 1,
+                          color: AppColors.grayColor.withOpacity(0.5),
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -224,32 +244,33 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 20),
                   TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, SignupScreen.routeName);
-                      },
-                      child: RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
+                    onPressed: () {
+                      Navigator.pushNamed(context, SignupScreen.routeName);
+                    },
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: TextStyle(
+                          color: AppColors.blackColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        children: [
+                          const TextSpan(text: "Don’t have an account yet? "),
+                          TextSpan(
+                            text: "Register",
                             style: TextStyle(
-                                color: AppColors.blackColor,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400),
-                            children: [
-                              const TextSpan(
-                                text: "Don’t have an account yet? ",
-                              ),
-                              TextSpan(
-                                  text: "Register",
-                                  style: TextStyle(
-                                      color: AppColors.secondaryColor1,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500)),
-                            ]),
-                      )),
+                              color: AppColors.secondaryColor1,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

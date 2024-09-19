@@ -1,6 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitverse/utils/app_colors.dart';
 import 'package:flutter/material.dart';
-
 import '../../common_widgets/round_gradient_button.dart';
 import '../../common_widgets/round_textfield.dart';
 import '../profile/complete_profile_screen.dart';
@@ -15,7 +16,46 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _isPasswordVisible = false;
   bool isCheck = false;
+  final RegExp passwordRegExp = RegExp(r'^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$');
+
+  // Method to handle Firebase signup and storing additional user info
+  Future<void> _signup() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        // Register user with Firebase Authentication
+        UserCredential userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+
+        // Store additional user details in Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .set({
+          'firstName': _firstNameController.text.trim(),
+          'lastName': _lastNameController.text.trim(),
+          'email': _emailController.text.trim(),
+        });
+
+        // Navigate to the Complete Profile screen on successful signup
+        Navigator.pushNamed(context, CompleteProfileScreen.routeName);
+      } on FirebaseAuthException catch (e) {
+        // Show error message if signup fails
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Signup failed: ${e.message}')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +69,7 @@ class _SignupScreenState extends State<SignupScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: 15,
-                ),
+                const SizedBox(height: 15),
                 Text(
                   "Hey there,",
                   style: TextStyle(
@@ -39,7 +77,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     fontSize: 16,
                   ),
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Text(
                   "Create an Account",
                   style: TextStyle(
@@ -49,52 +87,92 @@ class _SignupScreenState extends State<SignupScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                SizedBox(
-                  height: 15,
-                ),
-                RoundTextField(
-                  hintText: "First Name",
-                  icon: "assets/icons/profile_icon.png",
-                  textInputType: TextInputType.name,
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                RoundTextField(
-                    hintText: "Last Name",
-                    icon: "assets/icons/profile_icon.png",
-                    textInputType: TextInputType.name),
-                SizedBox(
-                  height: 15,
-                ),
-                RoundTextField(
-                    hintText: "Email",
-                    icon: "assets/icons/message_icon.png",
-                    textInputType: TextInputType.emailAddress),
-                SizedBox(
-                  height: 15,
-                ),
-                RoundTextField(
-                  hintText: "Password",
-                  icon: "assets/icons/lock_icon.png",
-                  textInputType: TextInputType.text,
-                  isObscureText: true,
-                  rightIcon: TextButton(
-                      onPressed: () {},
-                      child: Container(
-                          alignment: Alignment.center,
-                          width: 20,
-                          height: 20,
-                          child: Image.asset(
-                            "assets/icons/hide_pwd_icon.png",
+                const SizedBox(height: 15),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      RoundTextField(
+                        controller: _firstNameController,
+                        hintText: "First Name",
+                        icon: "assets/icons/profile_icon.png",
+                        textInputType: TextInputType.name,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your first name';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 15),
+                      RoundTextField(
+                        controller: _lastNameController,
+                        hintText: "Last Name",
+                        icon: "assets/icons/profile_icon.png",
+                        textInputType: TextInputType.name,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your last name';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 15),
+                      RoundTextField(
+                        controller: _emailController,
+                        hintText: "Email",
+                        icon: "assets/icons/message_icon.png",
+                        textInputType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your email';
+                          } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                              .hasMatch(value)) {
+                            return 'Please enter a valid email';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 15),
+                      RoundTextField(
+                        controller: _passwordController,
+                        hintText: "Password",
+                        icon: "assets/icons/lock_icon.png",
+                        textInputType: TextInputType.text,
+                        isObscureText: !_isPasswordVisible,
+                        rightIcon: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordVisible = !_isPasswordVisible;
+                            });
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
                             width: 20,
                             height: 20,
-                            fit: BoxFit.contain,
-                            color: AppColors.grayColor,
-                          ))),
-                ),
-                SizedBox(
-                  height: 15,
+                            child: Image.asset(
+                              _isPasswordVisible
+                                  ? "assets/icons/show_pwd_icon.png"
+                                  : "assets/icons/hide_pwd_icon.png",
+                              width: 20,
+                              height: 20,
+                              fit: BoxFit.contain,
+                              color: AppColors.grayColor,
+                            ),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your password';
+                          } else if (!passwordRegExp.hasMatch(value)) {
+                            return 'Password must contain 1 uppercase letter, 1 number, and be at least 8 characters long';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 15),
+                    ],
+                  ),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -113,26 +191,20 @@ class _SignupScreenState extends State<SignupScreen> {
                         )),
                     Expanded(
                       child: Text(
-                          "By continuing you accept our Privacy Policy and\nTerm of Use",
+                          "By continuing you accept our Privacy Policy and\nTerms of Use",
                           style: TextStyle(
                             color: AppColors.grayColor,
                             fontSize: 10,
                           )),
-                    )
+                    ),
                   ],
                 ),
-                SizedBox(
-                  height: 40,
-                ),
+                const SizedBox(height: 40),
                 RoundGradientButton(
                   title: "Register",
-                  onPressed: () {
-                    Navigator.pushNamed(context, CompleteProfileScreen.routeName);
-                  },
+                  onPressed: _signup,
                 ),
-                SizedBox(
-                  height: 10,
-                ),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(
@@ -154,48 +226,56 @@ class _SignupScreenState extends State<SignupScreen> {
                     )),
                   ],
                 ),
-                SizedBox(
-                  height: 20,
-                ),
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     GestureDetector(
-                      onTap: () {
-
-                      },
+                      onTap: () {},
                       child: Container(
                         width: 50,
                         height: 50,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppColors.primaryColor1.withOpacity(0.5), width: 1, ),
+                          border: Border.all(
+                            color:
+                                AppColors.primaryColor1.withOpacity(0.5),
+                            width: 1,
+                          ),
                         ),
-                        child: Image.asset("assets/icons/google_icon.png",width: 20,height: 20,),
+                        child: Image.asset(
+                          "assets/icons/google_icon.png",
+                          width: 20,
+                          height: 20,
+                        ),
                       ),
                     ),
-                    SizedBox(width: 30,),
+                    const SizedBox(width: 30),
                     GestureDetector(
-                      onTap: () {
-
-                      },
+                      onTap: () {},
                       child: Container(
                         width: 50,
                         height: 50,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppColors.primaryColor1.withOpacity(0.5), width: 1, ),
+                          border: Border.all(
+                            color:
+                                AppColors.primaryColor1.withOpacity(0.5),
+                            width: 1,
+                          ),
                         ),
-                        child: Image.asset("assets/icons/facebook_icon.png",width: 20,height: 20,),
+                        child: Image.asset(
+                          "assets/icons/facebook_icon.png",
+                          width: 20,
+                          height: 20,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                SizedBox(
-                  height: 20,
-                ),
+                const SizedBox(height: 20),
                 TextButton(
                     onPressed: () {
                       Navigator.pop(context);
@@ -208,9 +288,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               fontSize: 14,
                               fontWeight: FontWeight.w400),
                           children: [
-                            const TextSpan(
-                              text: "Already have an account? ",
-                            ),
+                            const TextSpan(text: "Already have an account? "),
                             TextSpan(
                                 text: "Login",
                                 style: TextStyle(
