@@ -10,7 +10,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Flutter Demo',
       home: ExamplePage(),
     );
@@ -50,7 +50,7 @@ class _ExamplePageState extends State<ExamplePage> {
         appbar: true,
         selectedDayPosition: SelectedDayPosition.center,
         leading: IconButton(
-          icon: Icon(
+          icon: const Icon(
             Icons.arrow_back_ios_new,
             color: Colors.white,
           ),
@@ -69,8 +69,8 @@ class _ExamplePageState extends State<ExamplePage> {
         locale: 'en',
         initialDate: DateTime.now(),
         calendarEventColor: Colors.green,
-        firstDate: DateTime.now().subtract(Duration(days: 140)),
-        lastDate: DateTime.now().add(Duration(days: 60)),
+        firstDate: DateTime.now().subtract(const Duration(days: 140)),
+        lastDate: DateTime.now().add(const Duration(days: 60)),
         events: List.generate(
             100,
             (index) => DateTime.now()
@@ -84,8 +84,8 @@ class _ExamplePageState extends State<ExamplePage> {
           width: double.maxFinite,
           height: double.maxFinite,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-                colors: [ const Color(0xff9DCEFF), const Color(0xff92A3FD),
+            gradient: const LinearGradient(
+                colors: [ Color(0xff9DCEFF), Color(0xff92A3FD),
                 
             ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
             borderRadius: BorderRadius.circular(10.0),
@@ -99,10 +99,10 @@ class _ExamplePageState extends State<ExamplePage> {
               onPressed: () {
                 _calendarAgendaControllerAppBar.goToDay(DateTime.now());
               },
-              child: Text("Today, appbar = true"),
+              child: const Text("Today, appbar = true"),
             ),
             Text('Selected date is $_selectedDateAppBBar'),
-            SizedBox(
+            const SizedBox(
               height: 20.0,
             ),
           ],

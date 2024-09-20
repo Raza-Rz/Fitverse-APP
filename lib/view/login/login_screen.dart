@@ -6,7 +6,7 @@ import 'package:fitverse/view/login/forgot_screen.dart';
 import 'package:flutter/material.dart';
 import '../../common_widgets/round_gradient_button.dart';
 import '../../common_widgets/round_textfield.dart';
-import '../profile/complete_profile_screen.dart';
+
 
 class LoginScreen extends StatefulWidget {
   static String routeName = "/LoginScreen";
@@ -37,6 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
 
         // Navigate to the complete profile screen on successful login
+        // ignore: use_build_context_synchronously
         Navigator.pushNamed(context, DashboardScreen.routeName);
       } on FirebaseAuthException catch (e) {
         // Show error message if login fails
@@ -49,6 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
           errorMessage = 'No user found for that email, please Register';
         }
 
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
         );
@@ -180,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: AppColors.grayColor.withOpacity(0.5),
                         ),
                       ),
-                      Text(
+                      const Text(
                         "  Or  ",
                         style: TextStyle(
                           color: AppColors.grayColor,
@@ -221,7 +223,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 30),
+                      const SizedBox(width: 30),
                       GestureDetector(
                         onTap: () {},
                         child: Container(
@@ -251,14 +253,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     child: RichText(
                       textAlign: TextAlign.center,
-                      text: TextSpan(
+                      text: const TextSpan(
                         style: TextStyle(
                           color: AppColors.blackColor,
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                         ),
                         children: [
-                          const TextSpan(text: "Don’t have an account yet? "),
+                          TextSpan(text: "Don’t have an account yet? "),
                           TextSpan(
                             text: "Register",
                             style: TextStyle(

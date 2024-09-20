@@ -82,6 +82,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           'height': heightController?.text ?? '',
         });
 
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile Updated Successfully')),
         );
@@ -116,7 +117,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 20),
-            Stack(
+            const Stack(
               children: [
                CircleAvatar(
               radius: 50,

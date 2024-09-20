@@ -32,7 +32,7 @@ class WhatTrainRow extends StatelessWidget {
                   children: [
                     Text(
                       wObj["title"].toString(),
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: AppColors.blackColor,
                           fontSize: 14,
                           fontWeight: FontWeight.w500),
@@ -42,7 +42,7 @@ class WhatTrainRow extends StatelessWidget {
                     ),
                     Text(
                       "${wObj["exercises"].toString()} | ${ wObj["time"].toString() }" ,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppColors.grayColor,
                         fontSize: 12,
                       ),

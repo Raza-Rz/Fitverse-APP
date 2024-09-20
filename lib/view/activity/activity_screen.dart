@@ -59,12 +59,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
       child: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return [
-            SliverAppBar(
+            const SliverAppBar(
               backgroundColor: Colors.transparent,
               centerTitle: true,
               elevation: 0,
               // pinned: true,
-              title: const Text(
+              title: Text(
                 "Workout Tracker",
                 style: TextStyle(
                     color: AppColors.whiteColor,
@@ -133,7 +133,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           (LineChartBarData barData, List<int> spotIndexes) {
                         return spotIndexes.map((index) {
                           return TouchedSpotIndicatorData(
-                            FlLine(
+                            const FlLine(
                               color: Colors.transparent,
                             ),
                             FlDotData(
@@ -171,8 +171,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     maxY: 110,
                     titlesData: FlTitlesData(
                         show: true,
-                        leftTitles: AxisTitles(),
-                        topTitles: AxisTitles(),
+                        leftTitles: const AxisTitles(),
+                        topTitles: const AxisTitles(),
                         bottomTitles: AxisTitles(
                           sideTitles: bottomTitles,
                         ),
@@ -205,9 +205,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
         },
         body: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 color: AppColors.whiteColor,
-                borderRadius: const BorderRadius.only(
+                borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(25),
                     topRight: Radius.circular(25))),
           child: Scaffold(
@@ -238,7 +238,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        const Text(
                           "Daily Workout Schedule",
                           style: TextStyle(
                               color: AppColors.blackColor,
@@ -270,7 +270,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         "Upcoming Workout",
                         style: TextStyle(
                             color: AppColors.blackColor,
@@ -279,7 +279,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       ),
                       TextButton(
                         onPressed: () {},
-                        child: Text(
+                        child: const Text(
                           "See More",
                           style: TextStyle(
                               color: AppColors.grayColor,
@@ -301,7 +301,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   SizedBox(
                     height: media.width * 0.05,
                   ),
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
@@ -337,7 +337,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     );
   }
 
-  LineTouchData get lineTouchData1 => LineTouchData(
+  LineTouchData get lineTouchData1 => const LineTouchData(
     handleBuiltInTouches: true,
     touchTooltipData: LineTouchTooltipData(
       // tooltipBgColor: Colors.blueGrey.withOpacity(0.8),
@@ -354,7 +354,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     color: AppColors.whiteColor,
     barWidth: 4,
     isStrokeCapRound: true,
-    dotData: FlDotData(show: false),
+    dotData: const FlDotData(show: false),
     belowBarData: BarAreaData(show: false),
     spots: const [
       FlSpot(1, 35),
@@ -372,7 +372,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     color: AppColors.whiteColor.withOpacity(0.5),
     barWidth: 2,
     isStrokeCapRound: true,
-    dotData: FlDotData(show: false),
+    dotData: const FlDotData(show: false),
     belowBarData: BarAreaData(
       show: false,
     ),
@@ -420,7 +420,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     }
 
     return Text(text,
-        style: TextStyle(
+        style: const TextStyle(
           color: AppColors.whiteColor,
           fontSize: 12,
         ),
@@ -435,7 +435,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
   );
 
   Widget bottomTitleWidgets(double value, TitleMeta meta) {
-    var style = TextStyle(
+    var style = const TextStyle(
       color: AppColors.whiteColor,
       fontSize: 12,
     );

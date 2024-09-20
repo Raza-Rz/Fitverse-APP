@@ -47,9 +47,11 @@ class _SignupScreenState extends State<SignupScreen> {
         });
 
         // Navigate to the Complete Profile screen on successful signup
+        // ignore: use_build_context_synchronously
         Navigator.pushNamed(context, CompleteProfileScreen.routeName);
       } on FirebaseAuthException catch (e) {
         // Show error message if signup fails
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Signup failed: ${e.message}')),
         );
@@ -70,7 +72,7 @@ class _SignupScreenState extends State<SignupScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const SizedBox(height: 15),
-                Text(
+                const Text(
                   "Hey there,",
                   style: TextStyle(
                     color: AppColors.blackColor,
@@ -78,7 +80,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
                 const SizedBox(height: 5),
-                Text(
+                const Text(
                   "Create an Account",
                   style: TextStyle(
                     color: AppColors.blackColor,
@@ -189,7 +191,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               : Icons.check_box_outlined,
                           color: AppColors.grayColor,
                         )),
-                    Expanded(
+                    const Expanded(
                       child: Text(
                           "By continuing you accept our Privacy Policy and\nTerms of Use",
                           style: TextStyle(
@@ -213,7 +215,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       height: 1,
                       color: AppColors.grayColor.withOpacity(0.5),
                     )),
-                    Text("  Or  ",
+                    const Text("  Or  ",
                         style: TextStyle(
                             color: AppColors.grayColor,
                             fontSize: 12,
@@ -282,13 +284,13 @@ class _SignupScreenState extends State<SignupScreen> {
                     },
                     child: RichText(
                       textAlign: TextAlign.center,
-                      text: TextSpan(
+                      text: const TextSpan(
                           style: TextStyle(
                               color: AppColors.blackColor,
                               fontSize: 14,
                               fontWeight: FontWeight.w400),
                           children: [
-                            const TextSpan(text: "Already have an account? "),
+                            TextSpan(text: "Already have an account? "),
                             TextSpan(
                                 text: "Login",
                                 style: TextStyle(

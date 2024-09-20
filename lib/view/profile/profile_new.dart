@@ -85,7 +85,7 @@ class RefinedProfileScreen extends StatelessWidget {
                           .get(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
+                          return const Center(child: CircularProgressIndicator());
                         }
 
                         if (snapshot.hasError) {
@@ -93,7 +93,7 @@ class RefinedProfileScreen extends StatelessWidget {
                         }
 
                         if (!snapshot.hasData || !snapshot.data!.exists) {
-                          return Center(child: Text('No user data found.'));
+                          return const Center(child: Text('No user data found.'));
                         }
 
                         final userData = snapshot.data!.data() as Map<String, dynamic>;
@@ -104,7 +104,7 @@ class RefinedProfileScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 20),
                           child: Column(
                             children: [
-                              CircleAvatar(
+                              const CircleAvatar(
               radius: 50,
               backgroundColor: Colors.white, // Solid color background
               child: Icon(Icons.person, color: AppColors.primaryColor2, size: 40), // Placeholder icon
@@ -112,7 +112,7 @@ class RefinedProfileScreen extends StatelessWidget {
                               const SizedBox(height: 10),
                               Text(
                                 '$firstName $lastName',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -164,7 +164,7 @@ class RefinedProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
-          menuItem(Icons.person, 'Profile', () {
+          menuItem(Icons.person, 'Edit Profile', () {
             Navigator.pushNamed(context, EditProfileScreen.routeName);
           }),
           menuItem(Icons.star, 'Favorite', () {

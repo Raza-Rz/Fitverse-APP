@@ -12,6 +12,7 @@ class CompleteProfileScreen extends StatefulWidget {
   const CompleteProfileScreen({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _CompleteProfileScreenState createState() => _CompleteProfileScreenState();
 }
 
@@ -47,6 +48,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
         'gender': selectedGender,
       }, SetOptions(merge: true)); // Use merge to avoid overwriting other fields
 
+      // ignore: use_build_context_synchronously
       Navigator.pushNamed(context, WelcomeScreen.routeName);
     }
   }
@@ -64,7 +66,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
             children: [
               Image.asset("assets/images/complete_profile.png", width: media.width),
               const SizedBox(height: 15),
-              Text(
+              const Text(
                 "Let’s complete your profile",
                 style: TextStyle(
                     color: AppColors.blackColor,
@@ -72,7 +74,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                     fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 5),
-              Text(
+              const Text(
                 "It will help us to know more about you!",
                 style: TextStyle(
                   color: AppColors.grayColor,
@@ -109,7 +111,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                               value: name,
                               child: Text(
                                 name,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     color: AppColors.grayColor, fontSize: 14),
                               ),
                             );
@@ -121,7 +123,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                             print("Selected Gender: $value");
                           },
                           isExpanded: true,
-                          hint: Text(
+                          hint: const Text(
                             "Choose Gender",
                             style: TextStyle(
                                 color: AppColors.grayColor, fontSize: 12),

@@ -53,7 +53,7 @@ class RoundTextField extends StatelessWidget {
                   color: AppColors.grayColor,
                 )),
             suffixIcon: rightIcon,
-            hintStyle: TextStyle(fontSize: 12, color: AppColors.grayColor)),
+            hintStyle: const TextStyle(fontSize: 12, color: AppColors.grayColor)),
       ),
     );
   }
