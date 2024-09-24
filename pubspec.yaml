@@ -48,10 +48,11 @@ dependencies:
   calendar_agenda:
     path: dev_lib/calendar_agenda/
 
-
+  shared_preferences: ^2.0.13
   firebase_auth: ^5.3.0
   firebase_core: ^3.5.0
   cloud_firestore: ^5.4.2
+  google_sign_in: ^6.2.1
 # flutter_native_splash:
 #   color: "#ffffff"  # Background color for splash screen
 #   image: assets/splash.png  # Path to your splash image

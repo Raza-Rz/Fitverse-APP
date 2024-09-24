@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitverse/utils/app_colors.dart';
+import 'package:fitverse/view/signup/email_verification.dart';  // Ensure this import path is correct
 import 'package:flutter/material.dart';
 import '../../common_widgets/round_gradient_button.dart';
 import '../../common_widgets/round_textfield.dart';
-import '../profile/complete_profile_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   static String routeName = "/SignupScreen";
@@ -29,29 +29,37 @@ class _SignupScreenState extends State<SignupScreen> {
   Future<void> _signup() async {
     if (_formKey.currentState!.validate()) {
       try {
-        // Register user with Firebase Authentication
+        print('Registering user...');
         UserCredential userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
+        print('User registered: ${userCredential.user!.email}');
 
-        // Store additional user details in Firestore
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userCredential.user!.uid)
-            .set({
-          'firstName': _firstNameController.text.trim(),
-          'lastName': _lastNameController.text.trim(),
-          'email': _emailController.text.trim(),
-        });
+        User? user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await user.sendEmailVerification();
+          print('Email verification sent to ${user.email}');
 
-        // Navigate to the Complete Profile screen on successful signup
-        // ignore: use_build_context_synchronously
-        Navigator.pushNamed(context, CompleteProfileScreen.routeName);
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userCredential.user!.uid)
+              .set({
+            'firstName': _firstNameController.text.trim(),
+            'lastName': _lastNameController.text.trim(),
+            'email': _emailController.text.trim(),
+            'isEmailVerified': false, // To track email verification status
+          });
+          print('User data stored in Firestore');
+
+          // Navigate to Email Verification Screen
+          // ignore: use_build_context_synchronously
+          Navigator.pushNamed(context, EmailVerificationScreen.routeName);
+          print('Navigating to Email Verification Screen');
+        }
       } on FirebaseAuthException catch (e) {
-        // Show error message if signup fails
-        // ignore: use_build_context_synchronously
+        print('Error during signup: ${e.message}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Signup failed: ${e.message}')),
         );
@@ -241,8 +249,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color:
-                                AppColors.primaryColor1.withOpacity(0.5),
+                            color: AppColors.primaryColor1.withOpacity(0.5),
                             width: 1,
                           ),
                         ),
@@ -263,8 +270,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color:
-                                AppColors.primaryColor1.withOpacity(0.5),
+                            color: AppColors.primaryColor1.withOpacity(0.5),
                             width: 1,
                           ),
                         ),
@@ -292,13 +298,14 @@ class _SignupScreenState extends State<SignupScreen> {
                           children: [
                             TextSpan(text: "Already have an account? "),
                             TextSpan(
-                                text: "Login",
-                                style: TextStyle(
-                                    color: AppColors.secondaryColor1,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w800)),
+                              text: "Login",
+                              style: TextStyle(
+                                  color: AppColors.primaryColor1,
+                                  fontWeight: FontWeight.w700),
+                            ),
                           ]),
                     )),
+                const SizedBox(height: 20),
               ],
             ),
           ),

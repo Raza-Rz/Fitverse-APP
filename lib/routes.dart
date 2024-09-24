@@ -14,12 +14,13 @@ import 'package:fitverse/view/workout_schedule_view/workout_schedule_view.dart';
 import 'package:fitverse/view/profile/edit_profile.dart';
 import 'package:fitverse/view/profile/profile_new.dart';
 import 'package:flutter/material.dart';
-
+import 'package:fitverse/view/signup/email_verification.dart'; 
 final Map<String, WidgetBuilder> routes = {
   OnBoardingScreen.routeName: (context) => const OnBoardingScreen(),
   LoginScreen.routeName: (context) => const LoginScreen(),
   StartScreen.routeName: (context) => const StartScreen(),
   SignupScreen.routeName: (context) => const SignupScreen(),
+   EmailVerificationScreen.routeName: (context) => const EmailVerificationScreen(),
   CompleteProfileScreen.routeName: (context) => const CompleteProfileScreen(),
   WelcomeScreen.routeName: (context) => const WelcomeScreen(),
   EditProfileScreen.routeName: (context) => const EditProfileScreen(),

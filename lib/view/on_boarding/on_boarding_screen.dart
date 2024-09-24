@@ -1,6 +1,7 @@
 import 'package:fitverse/utils/app_colors.dart';
 import 'package:fitverse/view/on_boarding/widgets/pager_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../login/login_screen.dart';
 
 class OnBoardingScreen extends StatefulWidget {
@@ -41,6 +42,19 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   ];
   int selectedIndex = 0;
 
+  // Save onboarding status to SharedPreferences
+//   Future<void> _completeOnboarding() async {
+//     SharedPreferences prefs = await SharedPreferences.getInstance();
+// await prefs.setBool('seenOnboarding', true); // Set onboarding as completed
+//     Navigator.pushReplacementNamed(context, LoginScreen.routeName);
+//   }
+   void _completeOnboarding() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('seenOnboarding', true); // Set onboarding completed
+    Navigator.pushReplacementNamed(context, LoginScreen.routeName);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,18 +86,18 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                   height: 70,
                   child: CircularProgressIndicator(
                     color: AppColors.primaryColor1,
-                    value: (selectedIndex+1) / 4,
+                    value: (selectedIndex + 1) / 4,
                     strokeWidth: 3,
                   ),
                 ),
                 Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
+                  margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(35),
-                      color: AppColors.primaryColor1),
+                    borderRadius: BorderRadius.circular(35),
+                    color: AppColors.primaryColor1,
+                  ),
                   child: IconButton(
                     icon: const Icon(
                       Icons.navigate_next,
@@ -95,16 +109,15 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                         pageController.animateToPage(selectedIndex,
                             duration: const Duration(milliseconds: 700),
                             curve: Curves.easeInSine);
-                      }
-                      else{
-                        Navigator.pushNamed(context, LoginScreen.routeName);
+                      } else {
+                        _completeOnboarding(); // Mark onboarding as complete
                       }
                     },
                   ),
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

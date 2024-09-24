@@ -6,6 +6,7 @@ import 'package:fitverse/view/dashboard/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fitverse/view/profile/edit_profile.dart';
 import '../login/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RefinedProfileScreen extends StatelessWidget {
   static String routeName = "/RefinedProfileScreen";
@@ -105,10 +106,10 @@ class RefinedProfileScreen extends StatelessWidget {
                           child: Column(
                             children: [
                               const CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.white, // Solid color background
-              child: Icon(Icons.person, color: AppColors.primaryColor2, size: 40), // Placeholder icon
-            ),
+                                radius: 50,
+                                backgroundColor: Colors.white, // Solid color background
+                                child: Icon(Icons.person, color: AppColors.primaryColor2, size: 40), // Placeholder icon
+                              ),
                               const SizedBox(height: 10),
                               Text(
                                 '$firstName $lastName',
@@ -179,8 +180,8 @@ class RefinedProfileScreen extends StatelessWidget {
           menuItem(Icons.help, 'Help', () {
             Navigator.pushNamed(context, '/help');
           }),
-          menuItem(Icons.logout, 'Logout', () {
-            Navigator.pushNamed(context, LoginScreen.routeName);
+          menuItem(Icons.logout, 'Logout', () async {
+            await _logout(context); // Logout and clear preferences
           }),
         ],
       ),
@@ -206,5 +207,20 @@ class RefinedProfileScreen extends StatelessWidget {
         onTap: onTap,
       ),
     );
+  }
+
+  Future<void> _logout(BuildContext context) async {
+    // Sign out from Firebase
+    await FirebaseAuth.instance.signOut();
+    
+    // Clear saved credentials from SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('email');
+    await prefs.remove('password');
+    await prefs.setBool('remember_me', false);
+    await prefs.setBool('isLoggedIn', false); // Clear login status
+
+    // Navigate to Login Screen
+    Navigator.pushReplacementNamed(context, LoginScreen.routeName);
   }
 }
