@@ -128,37 +128,37 @@ class WorkoutScreen extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Row(
+            const Row(
               children: [
                 CircleAvatar(
                   radius: 50,
                   backgroundImage: AssetImage('assets/images/pp_4.png'), // Update image path
                 ),
-                const SizedBox(width: 20),
+                SizedBox(width: 20),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Total Body Tone', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 10),
+                      Text('Total Body Tone', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 10),
                       Row(
-                        children: const [
+                        children: [
                           Icon(Icons.fitness_center, color: Colors.green),
                           SizedBox(width: 5),
                           Text('High Intensity'),
                         ],
                       ),
-                      const SizedBox(height: 5),
+                      SizedBox(height: 5),
                       Row(
-                        children: const [
+                        children: [
                           Icon(Icons.timer, color: Colors.green),
                           SizedBox(width: 5),
                           Text('20 min'),
                         ],
                       ),
-                      const SizedBox(height: 5),
+                      SizedBox(height: 5),
                       Row(
-                        children: const [
+                        children: [
                           Icon(Icons.accessibility, color: Colors.green),
                           SizedBox(width: 5),
                           Text('220 cal'),

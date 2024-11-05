@@ -21,7 +21,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int selectTab = 0;
 
   final List<Widget> _widgetOptions = <Widget>[
-    const HomeScreen(),
+     HomeScreen(),
     const ActivityScreen(),
     const CameraScreen(),
     const RefinedProfileScreen()
