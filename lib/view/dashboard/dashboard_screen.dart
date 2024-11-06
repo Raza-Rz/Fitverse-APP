@@ -30,27 +30,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.whiteColor,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: InkWell(
-        onTap: () {},
-        child: SizedBox(
-          width: 70,
-          height: 70,
-          child: Container(
-            width: 65,
-            height: 65,
-            decoration: BoxDecoration(
-                gradient: LinearGradient(colors: AppColors.primaryG),
-                borderRadius: BorderRadius.circular(35),
-                boxShadow: const [
-                  BoxShadow(color: Colors.black12, blurRadius: 2)
-                ]),
-            child: const Icon(Icons.search_sharp,
-                color: AppColors.whiteColor, size: 32),
-          ),
-        ),
-      ),
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // floatingActionButton: InkWell(
+      //   onTap: () {},
+      //   child: SizedBox(
+      //     width: 70,
+      //     height: 70,
+      //     child: Container(
+      //       width: 65,
+      //       height: 65,
+      //       decoration: BoxDecoration(
+      //           gradient: LinearGradient(colors: AppColors.primaryG),
+      //           borderRadius: BorderRadius.circular(35),
+      //           boxShadow: const [
+      //             BoxShadow(color: Colors.black12, blurRadius: 2)
+      //           ]),
+      //       child: const Icon(Icons.search_sharp,
+      //           color: AppColors.whiteColor, size: 32),
+      //     ),
+      //   ),
+      // ),
       body: IndexedStack(
         index: selectTab,
         children: _widgetOptions,
@@ -61,14 +61,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
         padding: const EdgeInsets.all(0),
         child: Container(
           height: Platform.isIOS ? 70 : 65,
+          
           decoration: const BoxDecoration(
-              color: AppColors.whiteColor,
+              
+              color: Color.fromARGB(255, 255, 255, 255),
+              borderRadius: BorderRadiusDirectional.vertical(
+                top: Radius.circular(20)
+              ),
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 2,
+                    color: Color.fromARGB(31, 49, 49, 49),
+                    blurRadius: 6,
                     offset: Offset(0, -2))
-              ]),
+              ],
+              ),
+              
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -94,18 +101,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       });
                     }
                   }),
-              const SizedBox(width: 30),
-              TabButton(
-                  icon: "assets/icons/camera_icon.png",
-                  selectIcon: "assets/icons/camera_select_icon.png",
-                  isActive: selectTab == 2,
-                  onTap: () {
-                    if (mounted) {
-                      setState(() {
-                        selectTab = 2;
-                      });
-                    }
-                  }),
+              // const SizedBox(width: 30),
+              // TabButton(
+              //     icon: "assets/icons/camera_icon.png",
+              //     selectIcon: "assets/icons/camera_select_icon.png",
+              //     isActive: selectTab == 2,
+              //     onTap: () {
+              //       if (mounted) {
+              //         setState(() {
+              //           selectTab = 2;
+              //         });
+              //       }
+              //     }),
               TabButton(
                   icon: "assets/icons/user_icon.png",
                   selectIcon: "assets/icons/user_select_icon.png",
