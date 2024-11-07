@@ -19,9 +19,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<String> daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   final User? user = FirebaseAuth.instance.currentUser;
   late Stream<StepCount> _stepCountStream;
-  int _totalSteps = 0; 
-  double _caloriesBurned = 0; 
-  int _duration = 0; 
+  int _totalSteps = 0;
+  double _caloriesBurned = 0;
+  int _duration = 0;
 
   Map<String, dynamic> localData = {}; // Store local data for all days
 
@@ -36,7 +36,10 @@ class _HomeScreenState extends State<HomeScreen> {
     if (await Permission.activityRecognition.request().isGranted) {
       _initializeStepCounter();
     } else {
-      print('Activity recognition permission denied');
+      // Provide feedback to the user if permission is denied
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Activity recognition permission denied')),
+      );
     }
   }
 
@@ -49,6 +52,9 @@ class _HomeScreenState extends State<HomeScreen> {
         _duration = (_totalSteps / 1000).round();
       });
       _logStepsLocally(); // Log steps in local storage
+      if (user != null) {
+        _logStepsToFirestore(); // Log steps to Firestore
+      }
     });
   }
 
@@ -62,6 +68,25 @@ class _HomeScreenState extends State<HomeScreen> {
       String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
       await localStorage.writeData(currentDate, _totalSteps, _caloriesBurned, _duration);
     }
+  }
+
+  Future<void> _logStepsToFirestore() async {
+    String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    // Create a Firestore document for the user if it doesn't exist
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(user?.uid);
+    final dayData = {
+      'totalSteps': _totalSteps,
+      'caloriesBurned': _caloriesBurned,
+      'duration': _duration,
+    };
+
+    // Set the data in Firestore (will create the field automatically if it doesn't exist)
+    await userDoc.set({
+      'stepsData': {
+        currentDate: dayData,
+      }
+    }, SetOptions(merge: true)); // Merge with existing data if any
   }
 
   Future<void> _loadLocalData() async {
@@ -116,10 +141,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     currentDate,
                     style: TextStyle(color: const Color.fromARGB(255, 12, 12, 12), fontSize: 14),
                   ),
-                  // CircleAvatar(
-                  //   backgroundColor: AppColors.primaryColor1,
-                  //   child: Icon(Icons.person, color: Colors.white),
-                  // ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -180,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 10), 
 
               // Display the tracked steps in one row, and calories and duration in a second row
               Column(
@@ -205,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 20), 
 
               // Trending Workout Section
               Text(
@@ -229,102 +250,59 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Widget for Recent Activity Cards
-  Widget activityCard(String title, String value, IconData icon, Color iconColor, Color cardColor) {
+ Widget activityCard(String title, String value, IconData icon, Color iconColor, Color cardColor) {
     return Expanded(
       child: Container(
-        margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.all(5),
         decoration: BoxDecoration(
           color: cardColor,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(20),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 40, color: iconColor),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
-            ),
-            
-            Text(
-              value,
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-            ),const SizedBox(height: 15),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 30, color: iconColor),
+              const SizedBox(height: 10),
+              Text(title, style: const TextStyle(color: Color.fromARGB(255, 255, 255, 255), fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
+              Text(value, style: TextStyle(color: Colors.white)),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // Widget for Trending Workouts
+  // Widget for Trending Workout Section (Can be customized)
   Widget trendingWorkoutSection() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('workouts').where('trending', isEqualTo: true).snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return Center(child: Text('Error fetching data'));
-        }
-
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No trending workouts available'));
-        }
-
-        return ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: snapshot.data!.docs.length,
-          itemBuilder: (context, index) {
-            var workout = snapshot.data!.docs[index];
-            return Card(
-              margin: const EdgeInsets.only(right: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: Image.network(
-                  workout['imageUrl'],
-                  fit: BoxFit.cover,
-                  width: 150,
-                  height: 200,
-                ),
-              ),
-            );
-          },
-        );
-      },
+    return Center(
+      child: Text('Trending workouts will go here!'),
     );
   }
 }
 
-// LocalStorage class for saving and retrieving data locally
 class LocalStorage {
   Future<Map<String, dynamic>> readData() async {
     final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/health_data.json');
+    final file = File('${directory.path}/steps_data.json');
     if (await file.exists()) {
-      final jsonString = await file.readAsString();
-      return Map<String, dynamic>.from(jsonDecode(jsonString));
+      final content = await file.readAsString();
+      return json.decode(content);
     }
-    return {};
+    return {}; // Return empty map if no data is found
   }
 
-  Future<void> writeData(String date, int steps, double calories, int duration) async {
+  Future<void> writeData(String date, int steps, double caloriesBurned, int duration) async {
     final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/health_data.json');
+    final file = File('${directory.path}/steps_data.json');
     Map<String, dynamic> data = await readData();
-
     data[date] = {
       'totalSteps': steps,
-      'caloriesBurned': calories,
+      'caloriesBurned': caloriesBurned,
       'duration': duration,
     };
-
-    await file.writeAsString(jsonEncode(data));
+    await file.writeAsString(json.encode(data));
   }
 }
