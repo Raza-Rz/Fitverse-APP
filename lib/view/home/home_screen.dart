@@ -23,20 +23,19 @@ class _HomeScreenState extends State<HomeScreen> {
   double _caloriesBurned = 0;
   int _duration = 0;
 
-  Map<String, dynamic> localData = {}; // Store local data for all days
+  Map<String, dynamic> localData = {};
 
   @override
   void initState() {
     super.initState();
     _requestPermissions();
-    _loadLocalData(); // Load data on init
+    _loadDataForSelectedDay();
   }
 
   Future<void> _requestPermissions() async {
     if (await Permission.activityRecognition.request().isGranted) {
       _initializeStepCounter();
     } else {
-      // Provide feedback to the user if permission is denied
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Activity recognition permission denied')),
       );
@@ -51,10 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _caloriesBurned = calculateCaloriesBurned(_totalSteps);
         _duration = (_totalSteps / 1000).round();
       });
-      _logStepsLocally(); // Log steps in local storage
-      if (user != null) {
-        _logStepsToFirestore(); // Log steps to Firestore
-      }
+      _saveData();
     });
   }
 
@@ -62,56 +58,65 @@ class _HomeScreenState extends State<HomeScreen> {
     return steps * 0.04;
   }
 
-  void _logStepsLocally() async {
+  Future<void> _saveData() async {
+    String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    LocalStorage localStorage = LocalStorage();
+    await localStorage.writeData(currentDate, _totalSteps, _caloriesBurned, _duration);
+
     if (user != null) {
-      LocalStorage localStorage = LocalStorage();
-      String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-      await localStorage.writeData(currentDate, _totalSteps, _caloriesBurned, _duration);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .set({
+        'stepsData': {
+          currentDate: {
+            'totalSteps': _totalSteps,
+            'caloriesBurned': _caloriesBurned,
+            'duration': _duration,
+          }
+        }
+      }, SetOptions(merge: true));
     }
   }
 
-  Future<void> _logStepsToFirestore() async {
-    String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-    // Create a Firestore document for the user if it doesn't exist
-    final userDoc = FirebaseFirestore.instance.collection('users').doc(user?.uid);
-    final dayData = {
-      'totalSteps': _totalSteps,
-      'caloriesBurned': _caloriesBurned,
-      'duration': _duration,
-    };
-
-    // Set the data in Firestore (will create the field automatically if it doesn't exist)
-    await userDoc.set({
-      'stepsData': {
-        currentDate: dayData,
-      }
-    }, SetOptions(merge: true)); // Merge with existing data if any
-  }
-
-  Future<void> _loadLocalData() async {
-    LocalStorage localStorage = LocalStorage();
-    Map<String, dynamic> data = await localStorage.readData();
-    setState(() {
-      localData = data;
-      _fetchDataForSelectedDay(); // Fetch data for current day on init
-    });
-  }
-
-  Future<void> _fetchDataForSelectedDay() async {
+  Future<void> _loadDataForSelectedDay() async {
     String selectedDate = _getDateForSelectedDay();
-    if (localData.containsKey(selectedDate)) {
-      setState(() {
-        _totalSteps = localData[selectedDate]['totalSteps'];
-        _caloriesBurned = localData[selectedDate]['caloriesBurned'];
-        _duration = localData[selectedDate]['duration'];
-      });
-    } else {
-      setState(() {
-        _totalSteps = 0;
-        _caloriesBurned = 0;
-        _duration = 0;
-      });
+    bool dataFetched = false;
+
+    // Try fetching from Firestore first
+    if (user != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .get();
+
+      if (userDoc.exists && userDoc['stepsData'] != null && userDoc['stepsData'][selectedDate] != null) {
+        setState(() {
+          _totalSteps = userDoc['stepsData'][selectedDate]['totalSteps'] ?? 0;
+          _caloriesBurned = userDoc['stepsData'][selectedDate]['caloriesBurned'] ?? 0.0;
+          _duration = userDoc['stepsData'][selectedDate]['duration'] ?? 0;
+        });
+        dataFetched = true;
+      }
+    }
+
+    // Fallback to local storage if Firestore data is unavailable
+    if (!dataFetched) {
+      LocalStorage localStorage = LocalStorage();
+      localData = await localStorage.readData();
+      if (localData.containsKey(selectedDate)) {
+        setState(() {
+          _totalSteps = localData[selectedDate]['totalSteps'];
+          _caloriesBurned = localData[selectedDate]['caloriesBurned'];
+          _duration = localData[selectedDate]['duration'];
+        });
+      } else {
+        setState(() {
+          _totalSteps = 0;
+          _caloriesBurned = 0;
+          _duration = 0;
+        });
+      }
     }
   }
 
@@ -133,13 +138,12 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top bar with date and profile icon
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     currentDate,
-                    style: TextStyle(color: const Color.fromARGB(255, 12, 12, 12), fontSize: 14),
+                    style: TextStyle(color: Colors.black, fontSize: 14),
                   ),
                 ],
               ),
@@ -147,14 +151,12 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 'Dashboard',
                 style: TextStyle(
-                  color: const Color.fromARGB(255, 26, 26, 26),
+                  color: Colors.black,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Weekday Selector
               Container(
                 height: 40,
                 child: ListView.builder(
@@ -167,20 +169,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         setState(() {
                           selectedDayIndex = index;
                         });
-                        _fetchDataForSelectedDay(); // Fetch the data when a day is tapped
+                        _loadDataForSelectedDay();
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         margin: const EdgeInsets.only(right: 8),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primaryColor2 : const Color.fromARGB(255, 247, 247, 247),
+                          color: isSelected ? AppColors.primaryColor2 : const Color.fromARGB(255, 245, 245, 245),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Center(
                           child: Text(
                             daysOfWeek[index],
                             style: TextStyle(
-                              color: isSelected ? const Color.fromARGB(255, 255, 255, 255) : const Color.fromARGB(255, 0, 0, 0),
+                              color: isSelected ? Colors.white : Colors.black,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                             ),
                           ),
@@ -191,57 +193,41 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Recent Activity Section
               Text(
                 'Recent Activity',
                 style: TextStyle(
-                  color: const Color.fromARGB(255, 36, 36, 36),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10), 
-
-              // Display the tracked steps in one row, and calories and duration in a second row
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // First Row with Steps
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      activityCard('Steps Counter', '$_totalSteps steps', Icons.directions_walk, AppColors.whiteColor, const Color.fromARGB(255, 238, 42, 107)),
-                    ],
-                  ),
-                  const SizedBox(height: 10), // Space between rows
-                  // Second Row with Calories and Duration
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      activityCard('Calories Burned', '${_caloriesBurned.toInt()} kcal', Icons.local_fire_department, const Color.fromARGB(255, 255, 255, 255), const Color.fromARGB(255, 207, 46, 46)),
-                      activityCard('Duration', '$_duration min', Icons.access_time, Colors.white, Colors.blue),
-                    ],
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20), 
-
-              // Trending Workout Section
-              Text(
-                'Trending Workout',
-                style: TextStyle(
-                  color: const Color.fromARGB(255, 8, 8, 8),
+                  color: Colors.black,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 10),
-              Container(
-                height: 200, // Adjust height as needed
-                child: trendingWorkoutSection(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  activityCard('Steps Counter', '$_totalSteps steps', Icons.directions_walk, Colors.white, Colors.pink),
+                ],
               ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  activityCard('Calories Burned', '${_caloriesBurned.toInt()} kcal', Icons.local_fire_department, Colors.white, Colors.red),
+                  activityCard('Duration', '$_duration min', Icons.access_time, Colors.white, Colors.blue),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // Placeholder for Trending Workout Section
+              Text(
+                'Trending Workouts',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              trendingWorkoutSection(),
             ],
           ),
         ),
@@ -249,8 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Widget for Recent Activity Cards
- Widget activityCard(String title, String value, IconData icon, Color iconColor, Color cardColor) {
+  Widget activityCard(String title, String value, IconData icon, Color iconColor, Color cardColor) {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.all(5),
@@ -265,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Icon(icon, size: 30, color: iconColor),
               const SizedBox(height: 10),
-              Text(title, style: const TextStyle(color: Color.fromARGB(255, 255, 255, 255), fontWeight: FontWeight.bold)),
+              Text(title, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               const SizedBox(height: 5),
               Text(value, style: TextStyle(color: Colors.white)),
             ],
@@ -275,34 +260,47 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Widget for Trending Workout Section (Can be customized)
+  // Dummy trending workout section, replace with actual data and UI components
   Widget trendingWorkoutSection() {
-    return Center(
-      child: Text('Trending workouts will go here!'),
+    return ListView.builder(
+      shrinkWrap: true,  // Prevent scrolling from affecting the layout
+      physics: NeverScrollableScrollPhysics(), // Disable scrolling
+      itemCount: 5, // Replace with actual number of workouts
+      itemBuilder: (context, index) {
+        return Card(
+          color: Colors.blueAccent,
+          child: ListTile(
+            title: Text('Trending Workout ${index + 1}', style: TextStyle(color: Colors.white)),
+            subtitle: Text('Description for trending workout ${index + 1}', style: TextStyle(color: Colors.white)),
+          ),
+        );
+      },
     );
   }
 }
 
 class LocalStorage {
-  Future<Map<String, dynamic>> readData() async {
+  Future<void> writeData(String date, int totalSteps, double caloriesBurned, int duration) async {
     final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/steps_data.json');
+    final file = File('${directory.path}/step_data.json');
+    Map<String, dynamic> data = {};
     if (await file.exists()) {
-      final content = await file.readAsString();
-      return json.decode(content);
+      data = jsonDecode(await file.readAsString());
     }
-    return {}; // Return empty map if no data is found
-  }
-
-  Future<void> writeData(String date, int steps, double caloriesBurned, int duration) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/steps_data.json');
-    Map<String, dynamic> data = await readData();
     data[date] = {
-      'totalSteps': steps,
+      'totalSteps': totalSteps,
       'caloriesBurned': caloriesBurned,
       'duration': duration,
     };
-    await file.writeAsString(json.encode(data));
+    await file.writeAsString(jsonEncode(data));
+  }
+
+  Future<Map<String, dynamic>> readData() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/step_data.json');
+    if (await file.exists()) {
+      return jsonDecode(await file.readAsString());
+    }
+    return {};
   }
 }
