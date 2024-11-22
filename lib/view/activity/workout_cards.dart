@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fitverse/utils/app_colors.dart';
+
+ // Ensure you have your AppColors file imported
 
 class ActivityScreen extends StatelessWidget {
   const ActivityScreen({Key? key}) : super(key: key);
@@ -9,54 +12,54 @@ class ActivityScreen extends StatelessWidget {
       {
         'title': 'Chest & Abdominal',
         'subtitle': '12 Exercises',
-        'color': '#FFC898',
+        'color': AppColors.primaryColor2, // Use AppColors
         'imagePath': 'assets/images/chest_abdominal.png',
         'route': const ChestAbdominalScreen(),
       },
       {
         'title': 'Back & Shoulder',
         'subtitle': '12 Exercises',
-        'color': '#D7B6F7',
+        'color': AppColors.primaryColor2, // Use AppColors
         'imagePath': 'assets/images/back_shoulder.png',
         'route': const BackShoulderScreen(),
       },
       {
         'title': 'Shoulder',
         'subtitle': '10 Exercises',
-        'color': '#FFCCCC',
+        'color': AppColors.primaryColor2, // Use AppColors
         'imagePath': 'assets/images/shoulder.png',
         'route': const ShoulderScreen(),
       },
       {
         'title': 'Arms',
         'subtitle': '15 Exercises',
-        'color': '#FFDE9A',
+        'color': AppColors.primaryColor2, // Use AppColors
         'imagePath': 'assets/images/arms.png',
         'route': const ArmsScreen(),
       },
       {
         'title': 'Legs',
         'subtitle': '18 Exercises',
-        'color': '#C6FFD9',
+        'color': AppColors.primaryColor2, // Use AppColors
         'imagePath': 'assets/images/legs.png',
         'route': const LegsScreen(),
       },
     ];
 
     return Scaffold(
-          appBar: AppBar(
-      title: const Text(
-        'Workouts',
-        style: TextStyle(
-          fontSize: 18, // Change the font size
-          fontWeight: FontWeight.bold, // Change the font weight
-          color: Colors.black, // Optional: Customize the text color
+      appBar: AppBar(
+        title: const Text(
+          'Workouts',
+          style: TextStyle(
+            fontSize: 18, // Change the font size
+            fontWeight: FontWeight.bold, // Change the font weight
+            color: Colors.black, // Optional: Customize the text color
+          ),
         ),
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        backgroundColor: AppColors.whiteColor, // Use AppColors for app bar background
       ),
-      automaticallyImplyLeading: false,
-      centerTitle: true,
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-    ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView.builder(
@@ -75,7 +78,7 @@ class ActivityScreen extends StatelessWidget {
               child: WorkoutCard(
                 title: category['title'] ?? 'No Title',
                 subtitle: category['subtitle'] ?? 'No Subtitle',
-                color: category['color'] ?? '#FFFFFF',
+                color: category['color'] ?? AppColors.whiteColor, // Default fallback to AppColors
                 imagePath: category['imagePath'] ?? '',
               ),
             );
@@ -89,7 +92,7 @@ class ActivityScreen extends StatelessWidget {
 class WorkoutCard extends StatelessWidget {
   final String title;
   final String subtitle;
-  final String color;
+  final Color color;
   final String imagePath;
 
   const WorkoutCard({
@@ -102,13 +105,11 @@ class WorkoutCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardColor = Color(int.parse(color.replaceFirst('#', '0xFF')));
-
     return Container(
       margin: const EdgeInsets.only(bottom: 16.0),
       height: 150,
       decoration: BoxDecoration(
-        color: cardColor,
+        color: color,
         borderRadius: BorderRadius.circular(16.0),
         boxShadow: [
           BoxShadow(
@@ -126,8 +127,8 @@ class WorkoutCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(16.0),
               gradient: LinearGradient(
                 colors: [
-                  cardColor.withOpacity(0.8),
-                  cardColor.withOpacity(0.6),
+                  color.withOpacity(0.8),
+                  color.withOpacity(0.6),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -161,16 +162,9 @@ class WorkoutCard extends StatelessWidget {
                       Text(
                         title,
                         style: const TextStyle(
-                          color: Color.fromARGB(255, 0, 0, 0),
+                          color: Colors.black,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          shadows: [
-                            // Shadow(
-                            //   blurRadius: 2.0,
-                            //   color: Colors.black45,
-                            //   offset: Offset(1, 1),
-                            // ),
-                          ],
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -179,13 +173,6 @@ class WorkoutCard extends StatelessWidget {
                         style: const TextStyle(
                           color: Color.fromARGB(179, 26, 26, 26),
                           fontSize: 14,
-                          shadows: [
-                            // Shadow(
-                            //   blurRadius: 2.0,
-                            //   color: Colors.black45,
-                            //   offset: Offset(1, 1),
-                            // ),
-                          ],
                         ),
                       ),
                     ],
