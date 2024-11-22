@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fitverse/utils/app_colors.dart';
 import 'package:fitverse/view/activity/activity_screen.dart';
+import 'package:fitverse/view/activity/workout_cards.dart';
 import 'package:fitverse/view/camera/camera_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fitverse/view/profile/profile_new.dart';

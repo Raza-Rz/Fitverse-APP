@@ -52,15 +52,13 @@ class RefinedProfileScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     // AppBar content
-                    SafeArea(
+                      SafeArea(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
                         child: Row(
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.arrow_back, color: Colors.white),
-                              onPressed: () => Navigator.pushNamed(context, DashboardScreen.routeName),
-                            ),
+                            // Remove the back button or replace it with SizedBox for spacing
+                            const SizedBox(width: 48), // Keeps the layout aligned
                             const Expanded(
                               child: Center(
                                 child: Text(
@@ -73,11 +71,12 @@ class RefinedProfileScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 48),
+                            const SizedBox(width: 48), // To balance spacing on the right
                           ],
                         ),
                       ),
                     ),
+
                     // Profile header content
                     FutureBuilder<DocumentSnapshot>(
                       future: FirebaseFirestore.instance
@@ -169,7 +168,7 @@ class RefinedProfileScreen extends StatelessWidget {
             Navigator.pushNamed(context, EditProfileScreen.routeName);
           }),
           menuItem(Icons.star, 'Favorite', () {
-            Navigator.pushNamed(context, WorkoutScreen.routeName);
+            Navigator.pushNamed(context, 'WorkoutScreen.routeName');
           }),
           menuItem(Icons.privacy_tip, 'Privacy Policy', () {
             Navigator.pushNamed(context, '/privacy');

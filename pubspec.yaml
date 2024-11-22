@@ -92,7 +92,11 @@ flutter:
   assets:
      - assets/images/
      - assets/icons/
-
+     - assets/images/chest_abdominal.png
+     - assets/images/back_shoulder.png
+     - assets/images/shoulder.png
+     - assets/images/arms.png
+     - assets/images/legs.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
