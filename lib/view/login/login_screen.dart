@@ -32,20 +32,29 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // Load saved email and password from SharedPreferences
-  Future<void> _loadSavedCredentials() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedEmail = prefs.getString('email');
-    String? savedPassword = prefs.getString('password');
-    bool? savedRememberMe = prefs.getBool('remember_me') ?? false;
+Future<void> _loadSavedCredentials() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? savedEmail = prefs.getString('email');
+  String? savedPassword = prefs.getString('password');
+  bool? savedRememberMe = prefs.getBool('remember_me') ?? false;
 
-    if (savedRememberMe) {
-      setState(() {
-        _emailController.text = savedEmail ?? '';
-        _passwordController.text = savedPassword ?? '';
-        _rememberMe = savedRememberMe;
-      });
+  if (savedRememberMe && savedEmail != null && savedPassword != null) {
+    try {
+      // Automatically sign in the user using Firebase Auth
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: savedEmail,
+        password: savedPassword,
+      );
+      // Navigate to the Dashboard directly
+      if (context.mounted) {
+        Navigator.pushNamed(context, DashboardScreen.routeName);
+      }
+    } catch (e) {
+      // Handle any errors during auto-login (e.g., network issues)
+      print('Auto-login failed: $e');
     }
   }
+}
 
   // Save email and password to SharedPreferences
   Future<void> _saveCredentials() async {

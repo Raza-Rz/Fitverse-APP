@@ -12,7 +12,7 @@ class ActivityScreen extends StatelessWidget {
       {
         'title': 'Chest & Abdominal',
         'subtitle': '12 Exercises',
-        'color': AppColors.primaryColor2, // Use AppColors
+        'color':  AppColors.primaryColor2, // Use AppColors
         'imagePath': 'assets/images/chest_abdominal.png',
         'route': const ChestAbdominalScreen(),
       },

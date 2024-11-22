@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:fitverse/routes.dart';
 import 'package:fitverse/utils/app_colors.dart';
+import 'package:fitverse/view/dashboard/dashboard_screen.dart';
 import 'package:fitverse/view/login/login_screen.dart';
 import 'package:fitverse/view/on_boarding/on_boarding_screen.dart';
 import 'package:flutter/material.dart';
@@ -12,52 +13,63 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  bool _seenOnboarding = false;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkOnboardingStatus();
-  }
-
-  Future<void> _checkOnboardingStatus() async {
+  Future<Map<String, bool>> _getInitialScreenPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool seen = prefs.getBool('seenOnboarding') ?? false; // Default to false
-    setState(() {
-      _seenOnboarding = seen;
-      _isLoading = false;
-    });
+    bool seenOnboarding = prefs.getBool('seenOnboarding') ?? false;
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    return {
+      "seenOnboarding": seenOnboarding,
+      "isLoggedIn": isLoggedIn,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: SplashScreen(),
-      );
-    }
+    return FutureBuilder<Map<String, bool>>(
+      future: _getInitialScreenPreferences(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: SplashScreen(),
+          );
+        }
 
-    return MaterialApp(
-      title: 'Fitness',
-      debugShowCheckedModeBanner: false,
-      routes: routes,
-      theme: ThemeData(
-        primaryColor: AppColors.primaryColor1,
-        scaffoldBackgroundColor: AppColors.whiteColor,
-        useMaterial3: true,
-        fontFamily: "Poppins",
-      ),
-      home: _seenOnboarding ? const LoginScreen() : const OnBoardingScreen(),
+        if (snapshot.hasData) {
+          bool seenOnboarding = snapshot.data!['seenOnboarding']!;
+          bool isLoggedIn = snapshot.data!['isLoggedIn']!;
+
+          return MaterialApp(
+            title: 'FitVerse',
+            debugShowCheckedModeBanner: false,
+            routes: routes,
+            theme: ThemeData(
+              primaryColor: AppColors.primaryColor1,
+              scaffoldBackgroundColor: AppColors.whiteColor,
+              useMaterial3: true,
+              fontFamily: "Poppins",
+            ),
+            home: !seenOnboarding
+                ? const OnBoardingScreen()
+                : isLoggedIn
+                    ? const DashboardScreen()
+                    : const LoginScreen(),
+          );
+        }
+
+        // In case of an error, show a fallback screen
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(
+            body: Center(
+              child: Text("Error loading app preferences."),
+            ),
+          ),
+        );
+      },
     );
   }
 }
