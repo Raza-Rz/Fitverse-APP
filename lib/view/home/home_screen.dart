@@ -9,10 +9,13 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
+int _stepsAtLastReset = 0; // Steps count at the start of the day
+
 
 class _HomeScreenState extends State<HomeScreen> {
   int selectedDayIndex = DateTime.now().weekday - 1;
@@ -43,41 +46,63 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _initializeStepCounter() {
-    _stepCountStream = Pedometer.stepCountStream;
-    _stepCountStream.listen((StepCount event) {
+  _stepCountStream = Pedometer.stepCountStream;
+  _stepCountStream.listen((StepCount event) {
+    DateTime currentDate = DateTime.now();
+    String formattedDate = DateFormat('yyyy-MM-dd').format(currentDate);
+
+    // Check if the date has changed
+    SharedPreferences.getInstance().then((prefs) {
+      String? lastSavedDate = prefs.getString('lastSavedDate');
+      if (lastSavedDate != formattedDate) {
+        // New day detected: reset steps
+        _stepsAtLastReset = event.steps;
+        prefs.setString('lastSavedDate', formattedDate);
+        prefs.setInt('stepsAtLastReset', _stepsAtLastReset);
+      } else {
+        // Load stepsAtLastReset for the current day
+        _stepsAtLastReset = prefs.getInt('stepsAtLastReset') ?? event.steps;
+      }
+
+      // Update daily step count
       setState(() {
-        _totalSteps = event.steps;
+        _totalSteps = event.steps - _stepsAtLastReset;
         _caloriesBurned = calculateCaloriesBurned(_totalSteps);
         _duration = (_totalSteps / 1000).round();
       });
-      _saveData();
+
+      _saveData(); // Save the updated daily step count
     });
-  }
+  }).onError((error) {
+    print("Error listening to step count stream: $error");
+  });
+}
+
 
   double calculateCaloriesBurned(int steps) {
     return steps * 0.04;
   }
 
   Future<void> _saveData() async {
-    String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    LocalStorage localStorage = LocalStorage();
-    await localStorage.writeData(currentDate, _totalSteps, _caloriesBurned, _duration);
+  String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  LocalStorage localStorage = LocalStorage();
+  await localStorage.writeData(currentDate, _totalSteps, _caloriesBurned, _duration);
 
-    if (user != null) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user!.uid)
-          .set({
-        'stepsData': {
-          currentDate: {
-            'totalSteps': _totalSteps,
-            'caloriesBurned': _caloriesBurned,
-            'duration': _duration,
-          }
+  if (user != null) {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .set({
+      'stepsData': {
+        currentDate: {
+          'totalSteps': _totalSteps,
+          'caloriesBurned': _caloriesBurned,
+          'duration': _duration,
         }
-      }, SetOptions(merge: true));
-    }
+      }
+    }, SetOptions(merge: true));
   }
+}
 
   Future<void> _loadDataForSelectedDay() async {
     String selectedDate = _getDateForSelectedDay();
@@ -126,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return DateFormat('yyyy-MM-dd').format(selectedDate);
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
     String currentDate = DateFormat('EEEE, dd MMM').format(DateTime.now());
 
@@ -217,9 +242,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              // Placeholder for Trending Workout Section
+              // Blog Cards Section (Replacing Trending Workouts)
               Text(
-                'Trending Workouts',
+                'Latest Blogs',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 18,
@@ -227,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              trendingWorkoutSection(),
+              blogCardSection(),
             ],
           ),
         ),
@@ -261,20 +286,103 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Dummy trending workout section, replace with actual data and UI components
-  Widget trendingWorkoutSection() {
-    return ListView.builder(
-      shrinkWrap: true,  // Prevent scrolling from affecting the layout
-      physics: NeverScrollableScrollPhysics(), // Disable scrolling
-      itemCount: 5, // Replace with actual number of workouts
-      itemBuilder: (context, index) {
-        return Card(
-          color: Colors.blueAccent,
-          child: ListTile(
-            title: Text('Trending Workout ${index + 1}', style: TextStyle(color: Colors.white)),
-            subtitle: Text('Description for trending workout ${index + 1}', style: TextStyle(color: Colors.white)),
-          ),
-        );
-      },
+ // Blog card section replacing the "Trending Workouts"
+  Widget blogCardSection() {
+    return Column(
+      children: [
+        blogCard(
+          'Blog 1 Title',
+          'This is a short description of Blog 1 content.',
+          'assets/images/pp_4.png', // Replace with your actual image path
+          () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => BlogDetailScreen('Blog 1 Title', 'This is a longer content for blog 1...', 'assets/images/pp_4.png')),
+            );
+          },
+        ),
+        const SizedBox(height: 15),
+        blogCard(
+          'Blog 2 Title',
+          'This is a short description of Blog 2 content.',
+          'assets/images/pp_4.png', // Replace with your actual image path
+          () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => BlogDetailScreen('Blog 2 Title', 'This is a longer content for blog 2...', 'assets/images/pp_4.png')),
+            );
+          },
+        ),
+        const SizedBox(height: 15),
+        blogCard(
+          'Blog 3 Title',
+          'This is a short description of Blog 3 content.',
+          'assets/images/pp_4.png', // Replace with your actual image path
+          () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => BlogDetailScreen('Blog 3 Title', 'This is a longer content for blog 3...', 'assets/images/pp_4.png')),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  // Blog card widget
+  Widget blogCard(String title, String description, String imageUrl, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.asset(imageUrl, width: 100, height: 100, fit: BoxFit.cover),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 5),
+                  Text(description, style: TextStyle(color: Colors.grey[700])),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class BlogDetailScreen extends StatelessWidget {
+  final String title;
+  final String content;
+  final String imageUrl;
+
+  BlogDetailScreen(this.title, this.content, this.imageUrl);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Image.asset(imageUrl),
+            const SizedBox(height: 10),
+            Text(content, style: TextStyle(fontSize: 16)),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -282,10 +390,11 @@ class _HomeScreenState extends State<HomeScreen> {
 class LocalStorage {
   Future<void> writeData(String date, int totalSteps, double caloriesBurned, int duration) async {
     final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/step_data.json');
+    final file = File('${directory.path}/steps_data.json');
     Map<String, dynamic> data = {};
-    if (await file.exists()) {
-      data = jsonDecode(await file.readAsString());
+    if (file.existsSync()) {
+      String content = await file.readAsString();
+      data = jsonDecode(content);
     }
     data[date] = {
       'totalSteps': totalSteps,
@@ -297,10 +406,12 @@ class LocalStorage {
 
   Future<Map<String, dynamic>> readData() async {
     final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/step_data.json');
-    if (await file.exists()) {
-      return jsonDecode(await file.readAsString());
+    final file = File('${directory.path}/steps_data.json');
+    if (file.existsSync()) {
+      String content = await file.readAsString();
+      return jsonDecode(content);
     }
     return {};
   }
 }
+

@@ -23,7 +23,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _widgetOptions = <Widget>[
      HomeScreen(),
-    const ActivityScreen(),
+    ActivityScreen(),
     const CameraScreen(),
     const RefinedProfileScreen()
   ];
