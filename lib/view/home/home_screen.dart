@@ -9,13 +9,14 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:fitverse/view/home/ChatBotScreen.dart';
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 int _stepsAtLastReset = 0; // Steps count at the start of the day
 
+// APi Key: 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
 
 class _HomeScreenState extends State<HomeScreen> {
   int selectedDayIndex = DateTime.now().weekday - 1;
@@ -257,7 +258,23 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-    );
+          // Add the floating action button here
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              // Navigate to the ChatBotScreen
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChatbotScreen()),
+              );
+            },
+            backgroundColor: AppColors.primaryColor1, // Use your preferred color
+            child: Icon(
+              Icons.chat, // Chat icon for the floating button
+              color: Colors.white,
+            ),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // Position it at the bottom-right corner
+        );
   }
 
   Widget activityCard(String title, String value, IconData icon, Color iconColor, Color cardColor) {
