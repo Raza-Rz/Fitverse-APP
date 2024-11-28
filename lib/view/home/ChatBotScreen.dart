@@ -1,7 +1,9 @@
-import 'dart:convert';
-import 'dart:io';
+import 'dart:async';
+import 'dart:convert'; // For JSON encoding/decoding
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fitverse/utils/app_colors.dart';
 
 class ChatbotScreen extends StatefulWidget {
@@ -10,115 +12,195 @@ class ChatbotScreen extends StatefulWidget {
 }
 
 class _ChatbotScreenState extends State<ChatbotScreen> {
-  final List<Map<String, String>> _messages = []; // Stores messages
+  final List<Map<String, dynamic>> _messages = [];
   final TextEditingController _controller = TextEditingController();
-  late final GenerativeModel model; // Declare the model here
-  bool _isLoading = false; // To manage loading state
-  bool _isBotTyping = false; // To manage typing state
-  final ScrollController _scrollController = ScrollController(); // Add a ScrollController
+  late final GenerativeModel model;
+  final ScrollController _scrollController = ScrollController();
+  bool _isLoading = false;
+  bool _showGoToBottom = false;
+  bool _isManualScroll = false;
 
   @override
   void initState() {
     super.initState();
     _initializeChat();
+    _scrollController.addListener(_handleScroll);
+    _loadMessages();
+    _deleteOldMessages();
   }
 
-  // Initialize the chatbot with the API key and model
   Future<void> _initializeChat() async {
-    final apiKey = 'AIzaSyClfL314p0FtrUjBlh8zIJfNbYJt-c52fA'; // Replace with your actual API key
-    if (apiKey.isEmpty) {
-      print('Error: API key is missing!');
-      return; // Early exit to prevent further crashes
-    }
-    print('API Key: $apiKey'); // Verify API Key
-    
-    try {
-      model = GenerativeModel(
-        model: 'gemini-1.5-flash',
-        apiKey: apiKey,
-        generationConfig: GenerationConfig(
-          temperature: 1,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 8192,
-          responseMimeType: 'text/plain',
-        ),
-        systemInstruction: Content.system('You are a fitness assistant chatbot...'),
-      );
-      _sendMessage('Hello!');await Future.delayed(const Duration(seconds: 1));  // Adds a 1-second delay
+    final apiKey = 'AIzaSyClfL314p0FtrUjBlh8zIJfNbYJt-c52fA';
+    model = GenerativeModel(
+      model: 'gemini-1.5-flash',
+      apiKey: apiKey,
+      generationConfig: GenerationConfig(
+        temperature: 1,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 8192,
+        responseMimeType: 'text/plain',
+      ),
+      systemInstruction: Content.system('You are a fitness assistant chatbot...'),
+    );
+  }
 
-    } catch (e) {
-      print('Error initializing chatbot: $e');
+  void _handleScroll() {
+    if (_scrollController.offset < _scrollController.position.maxScrollExtent - 50) {
+      setState(() {
+        _showGoToBottom = true;
+      });
+    } else {
+      setState(() {
+        _showGoToBottom = false;
+      });
+    }
+
+    if (_scrollController.offset == _scrollController.position.maxScrollExtent) {
+      _isManualScroll = false;
+    } else {
+      _isManualScroll = true;
     }
   }
 
-  // Send the message to the model and get the response
   Future<void> _sendMessage(String message) async {
-    // Avoid sending duplicate messages
-    if (_messages.isNotEmpty && _messages.first['user'] == message) {
-      print('Duplicate message, skipping send.');
-      return;
-    }
+    if (message.trim().isEmpty) return;
 
+    final messageData = {'user': message, 'timestamp': DateTime.now().toIso8601String()};
     setState(() {
-      _messages.insert(0, {'user': message});
-      _isLoading = true;
-      _isBotTyping = true;
+      _messages.add(messageData);
     });
 
-    final content = Content.text(message);
-    final chat = model.startChat(history: [
-      Content.model([TextPart(message)]),
-    ]);
+    await _saveMessages();
+    _scrollToBottom();
 
     try {
-      // Adding a small delay to avoid rapid API calls
-      await Future.delayed(const Duration(seconds: 1)); // Add delay here if needed
-
+      final content = Content.text(message);
+      final chat = model.startChat(history: [Content.model([TextPart(message)])]);
       final response = await chat.sendMessage(content);
 
       if (response.text != null) {
-        setState(() {
-          _messages.insert(0, {'bot': response.text!});
-          _isBotTyping = false; // Hide 'Bot is typing'
-        });
+        _animateBotTyping(response.text!);
       } else {
-        setState(() {
-          _messages.insert(0, {'bot': 'Sorry, I didn\'t get a response.'});
-          _isBotTyping = false;
-        });
+        _addBotMessage('Sorry, I could not understand that.');
       }
     } catch (e) {
-      // Handle errors, retry logic can be added here
-      print('Error sending message: $e');
-      setState(() {
-        _messages.insert(0, {'bot': 'Error occurred, please try again.'});
-        _isBotTyping = false;
-      });
-    } finally {
-      setState(() {
-        _isLoading = false; // Hide loading indicator
-      });
+      _addBotMessage('Error occurred, please try again.');
     }
-
-    // Clear the input field after sending
-    _controller.clear();
-
-    // Scroll to the top of the new message after it is added
-    _scrollToTop();
   }
 
-  // Smoothly scroll to the top of the list (new message)
-  void _scrollToTop() {
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          0.0, // Scroll to the top (0.0 means top of the list)
-          duration: const Duration(milliseconds: 300), // Smooth scroll duration
-          curve: Curves.easeInOut,
-        );
+  void _addBotMessage(String message) {
+    final messageData = {'bot': message, 'timestamp': DateTime.now().toIso8601String()};
+    setState(() {
+      _messages.add(messageData);
+    });
+    _saveMessages();
+  }
+
+  void _animateBotTyping(String fullResponse) {
+    final messageData = {'bot': '', 'timestamp': DateTime.now().toIso8601String()};
+    setState(() {
+      _messages.add(messageData); // Placeholder for typing effect
+    });
+
+    int index = 0;
+    Timer.periodic(const Duration(milliseconds: 30), (timer) {
+      if (index < fullResponse.length) {
+        setState(() {
+          _messages[_messages.length - 1]['bot'] =
+              _messages[_messages.length - 1]['bot']! + fullResponse[index];
+        });
+        index++;
+        _scrollToBottom();
+      } else {
+        timer.cancel();
+        _saveMessages();
       }
     });
+  }
+
+  void _scrollToBottom() {
+  // Ensure this runs after the build cycle for accurate position data
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  });
+}
+
+
+  // Save messages to local storage
+  Future<void> _saveMessages() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = _messages.map((message) {
+      return {
+        ...message,
+        'timestamp': message['timestamp'] ?? DateTime.now().toIso8601String()
+      };
+    }).toList();
+    prefs.setString('chat_messages', jsonEncode(data));
+  }
+
+  // Load messages from local storage
+  Future<void> _loadMessages() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getString('chat_messages');
+    if (data != null) {
+      final savedMessages = List<Map<String, dynamic>>.from(jsonDecode(data));
+      setState(() {
+        _messages.addAll(savedMessages);
+      });
+    }
+  }
+
+  // Delete messages older than 3 days
+  Future<void> _deleteOldMessages() async {
+    final now = DateTime.now();
+    _messages.removeWhere((message) {
+      final timestamp = DateTime.parse(message['timestamp']);
+      return now.difference(timestamp).inDays > 3;
+    });
+    await _saveMessages();
+  }
+
+  Widget _buildMessage(Map<String, dynamic> message) {
+    final isUser = message.containsKey('user');
+    final text = isUser ? message['user']! : message['bot']!;
+
+    return Align(
+      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isUser ? AppColors.primaryColor1 : Colors.grey.shade200,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(12),
+            topRight: const Radius.circular(12),
+            bottomLeft: isUser ? const Radius.circular(12) : Radius.zero,
+            bottomRight: isUser ? Radius.zero : const Radius.circular(12),
+          ),
+        ),
+        child: isUser
+            ? Text(
+                text,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              )
+            : MarkdownBody(
+                data: text,
+                styleSheet: MarkdownStyleSheet(
+                  p: const TextStyle(fontSize: 16, color: Colors.black87),
+                ),
+              ),
+      ),
+    );
   }
 
   @override
@@ -129,105 +211,67 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         backgroundColor: AppColors.lightGrayColor,
         centerTitle: true,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // Chat messages
+          Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.only(bottom: 60),
+                  itemCount: _messages.length,
+                  itemBuilder: (context, index) {
+                    return _buildMessage(_messages[index]);
+                  },
+                ),
+              ),
+              _buildInputField(),
+            ],
+          ),
+          if (_showGoToBottom)
+            Positioned(
+              bottom: 70,
+              right: 20,
+              child: FloatingActionButton(
+                  mini: true,
+                  onPressed: _scrollToBottom,
+                  child: const Icon(Icons.arrow_downward),
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputField() {
+    return Container(
+      color: Colors.grey.shade100,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: Row(
+        children: [
           Expanded(
-            child: ListView.builder(
-              reverse: true, // This will show new messages at the bottom
-              padding: EdgeInsets.symmetric(vertical: 15),
-              itemCount: _messages.length + (_isBotTyping ? 1 : 0), // Add 1 for typing indicator
-              itemBuilder: (context, index) {
-                if (_isBotTyping && index == 0) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Bot is typing...',
-                        style: TextStyle(color: Colors.grey.shade600, fontStyle: FontStyle.italic),
-                      ),
-                    ),
-                  );
-                }
-                final message = _messages[index - (_isBotTyping ? 1 : 0)]; // Adjust index for typing indicator
-                final isUser = message.containsKey('user'); // Check if it's the user message
-                
-                // Apply smooth fade-in animation for each message bubble
-                return AnimatedOpacity(
-                  opacity: 1.0,
-                  duration: const Duration(milliseconds: 300), // Smooth fade-in
-                  child: Align(
-                    alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 16), // Add horizontal margin for breathing space
-                      padding: const EdgeInsets.all(14),
-                      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
-                      decoration: BoxDecoration(
-                        color: isUser ? AppColors.primaryColor1 : Colors.grey.shade300,
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(12),
-                          topRight: const Radius.circular(12),
-                          bottomLeft: isUser ? const Radius.circular(12) : const Radius.circular(0),
-                          bottomRight: isUser ? const Radius.circular(0) : const Radius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        isUser ? message['user']! : message['bot']!,
-                        style: TextStyle(
-                          color: isUser ? Colors.white : Colors.black,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-              controller: _scrollController, // Attach the controller to the ListView
+            child: TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                hintText: 'Type your message...',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
             ),
           ),
-          
-          // Input field
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: TextField(
-                      controller: _controller,
-                      style: const TextStyle(fontSize: 16),
-                      decoration: InputDecoration(
-                        hintText: 'Type your message...',
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.send, color: AppColors.primaryColor1),
-                          onPressed: () {
-                            if (_controller.text.isNotEmpty) {
-                              _sendMessage(_controller.text);
-                              _controller.clear(); // Clear text after sending
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.send, color: AppColors.primaryColor1),
+            onPressed: () {
+              final text = _controller.text;
+              _controller.clear();
+              _sendMessage(text);
+            },
           ),
         ],
       ),
