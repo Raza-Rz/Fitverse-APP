@@ -1,9 +1,8 @@
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fitverse/utils/app_colors.dart';
-import 'package:fitverse/view/activity/activity_screen.dart';
 import 'package:fitverse/view/activity/workout_cards.dart';
-import 'package:fitverse/view/camera/camera_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:fitverse/view/profile/profile_new.dart';
 
@@ -24,7 +23,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final List<Widget> _widgetOptions = <Widget>[
      HomeScreen(),
     ActivityScreen(),
-    const CameraScreen(),
     const RefinedProfileScreen()
   ];
 
@@ -32,26 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // floatingActionButton: InkWell(
-      //   onTap: () {},
-      //   child: SizedBox(
-      //     width: 70,
-      //     height: 70,
-      //     child: Container(
-      //       width: 65,
-      //       height: 65,
-      //       decoration: BoxDecoration(
-      //           gradient: LinearGradient(colors: AppColors.primaryG),
-      //           borderRadius: BorderRadius.circular(35),
-      //           boxShadow: const [
-      //             BoxShadow(color: Colors.black12, blurRadius: 2)
-      //           ]),
-      //       child: const Icon(Icons.search_sharp,
-      //           color: AppColors.whiteColor, size: 32),
-      //     ),
-      //   ),
-      // ),
+      
       body: IndexedStack(
         index: selectTab,
         children: _widgetOptions,
@@ -102,26 +81,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       });
                     }
                   }),
-              // const SizedBox(width: 30),
-              // TabButton(
-              //     icon: "assets/icons/camera_icon.png",
-              //     selectIcon: "assets/icons/camera_select_icon.png",
-              //     isActive: selectTab == 2,
-              //     onTap: () {
-              //       if (mounted) {
-              //         setState(() {
-              //           selectTab = 2;
-              //         });
-              //       }
-              //     }),
+             
               TabButton(
                   icon: "assets/icons/user_icon.png",
                   selectIcon: "assets/icons/user_select_icon.png",
-                  isActive: selectTab == 3,
+                  isActive: selectTab == 2,
                   onTap: () {
                     if (mounted) {
                       setState(() {
-                        selectTab = 3;
+                        selectTab = 2;
                       });
                     }
                   }),

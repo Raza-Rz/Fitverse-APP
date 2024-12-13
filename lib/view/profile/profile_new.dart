@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitverse/utils/app_colors.dart';
-import 'package:fitverse/view/activity/workout_screen.dart';
 import 'package:fitverse/view/dashboard/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fitverse/view/profile/edit_profile.dart';
@@ -167,18 +166,18 @@ class RefinedProfileScreen extends StatelessWidget {
           menuItem(Icons.person, 'Edit Profile', () {
             Navigator.pushNamed(context, EditProfileScreen.routeName);
           }),
-          menuItem(Icons.star, 'Favorite', () {
-            Navigator.pushNamed(context, 'WorkoutScreen.routeName');
-          }),
-          menuItem(Icons.privacy_tip, 'Privacy Policy', () {
-            Navigator.pushNamed(context, '/privacy');
-          }),
-          menuItem(Icons.settings, 'Settings', () {
-            Navigator.pushNamed(context, '/settings');
-          }),
-          menuItem(Icons.help, 'Help', () {
-            Navigator.pushNamed(context, '/help');
-          }),
+          // menuItem(Icons.star, 'Favorite', () {
+          //   Navigator.pushNamed(context, 'WorkoutScreen.routeName');
+          // }),
+          // menuItem(Icons.privacy_tip, 'Privacy Policy', () {
+          //   Navigator.pushNamed(context, '/privacy');
+          // }),
+          // menuItem(Icons.settings, 'Settings', () {
+          //   Navigator.pushNamed(context, '/settings');
+          // }),
+          // menuItem(Icons.help, 'Help', () {
+          //   Navigator.pushNamed(context, '/help');
+          // }),
           menuItem(Icons.logout, 'Logout', () async {
             await _logout(context); // Logout and clear preferences
           }),

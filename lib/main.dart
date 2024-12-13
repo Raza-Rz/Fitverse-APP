@@ -59,7 +59,7 @@ class _MyAppState extends State<MyApp> {
     }
 
     return MaterialApp(
-      title: 'FitVerse',
+      title: 'Fitverse',
       debugShowCheckedModeBanner: false,
       routes: routes,
       theme: ThemeData(
@@ -76,19 +76,17 @@ class _MyAppState extends State<MyApp> {
 class SplashScreen extends StatelessWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.whiteColor,
-      body: Center(
-        child: Image.asset(
-          'assets/images/splash_logo.png',
-          width: 200,
-          height: 200,
-        ),
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: SizedBox.expand(
+      child: Image.asset(
+        'assets/splash.png',
+        fit: BoxFit.cover, // Ensures the image scales and covers the entire screen
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class LoaderScreen extends StatefulWidget {

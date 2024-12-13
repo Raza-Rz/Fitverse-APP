@@ -305,78 +305,188 @@ class _HomeScreenState extends State<HomeScreen> {
   // Dummy trending workout section, replace with actual data and UI components
  // Blog card section replacing the "Trending Workouts"
   Widget blogCardSection() {
-    return Column(
-      children: [
-        blogCard(
-          'Blog 1 Title',
-          'This is a short description of Blog 1 content.',
-          'assets/images/pp_4.png', // Replace with your actual image path
-          () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => BlogDetailScreen('Blog 1 Title', 'This is a longer content for blog 1...', 'assets/images/pp_4.png')),
-            );
-          },
-        ),
-        const SizedBox(height: 15),
-        blogCard(
-          'Blog 2 Title',
-          'This is a short description of Blog 2 content.',
-          'assets/images/pp_4.png', // Replace with your actual image path
-          () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => BlogDetailScreen('Blog 2 Title', 'This is a longer content for blog 2...', 'assets/images/pp_4.png')),
-            );
-          },
-        ),
-        const SizedBox(height: 15),
-        blogCard(
-          'Blog 3 Title',
-          'This is a short description of Blog 3 content.',
-          'assets/images/pp_4.png', // Replace with your actual image path
-          () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => BlogDetailScreen('Blog 3 Title', 'This is a longer content for blog 3...', 'assets/images/pp_4.png')),
-            );
-          },
-        ),
-      ],
-    );
-  }
+  return Column(
+    children: [
+      blogCard(
+        'Benefits of Regular Exercise',
+        'Exercise is essential for a healthy lifestyle. see more...',
+        'assets/images/benefits of excercise.jpg', // Replace with your actual image path
+        () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BlogDetailScreen(
+                'Benefits of Regular Exercise', 
+                '''Regular exercise has numerous benefits for both the body and mind. 
+                It not only helps to maintain a healthy weight, but it also boosts cardiovascular health, strengthens muscles and bones, and improves mental health.
+
+                1-Physical Benefits:
+                - Increased Strength and Flexibility: Regular strength training helps improve muscle mass and bone density.
+                - Improved Cardiovascular Health: Aerobic exercises like running, cycling, or swimming strengthen the heart and lungs.
+                - Weight Management: Exercise, along with a balanced diet, helps regulate body weight and reduces the risk of obesity.
+                
+                2-Mental Health Benefits:
+                - Reduced Stress and Anxiety: Physical activity stimulates the production of endorphins, which help reduce stress levels and promote a feeling of well-being.
+                - Better Sleep Quality: Regular exercise can help regulate sleep patterns, leading to deeper and more restful sleep.
+
+                3-Tips for Getting Started:
+                - Start with simple exercises like walking or yoga.
+                - Gradually increase the intensity and duration of your workouts.
+                - Incorporate strength training and aerobic exercises into your routine for balanced fitness.
+
+                By making exercise a daily habit, you'll not only feel better physically but also experience improved mental clarity and emotional stability.''',
+                'assets/images/benefits of excercise.jpg', // Replace with image for Blog 1
+              ),
+            ),
+          );
+        },
+      ),
+      const SizedBox(height: 15),
+      blogCard(
+        'Nutrition for Athletes',
+        'Discover the best see more...',
+        'assets/images/nutrition.jpg', // Replace with your actual image path
+        () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BlogDetailScreen(
+                'Nutrition for Athletes', 
+                '''For athletes, nutrition plays a key role in performance and recovery. Eating the right foods can provide the energy needed for intense training and speed up recovery afterward.
+
+                1-Macronutrients:
+                - Carbohydrates: Carbs are the body's primary energy source, especially for high-intensity workouts. Foods like whole grains, fruits, and vegetables are excellent sources.
+                - Protein: Protein helps repair and build muscle tissue. Lean meats, eggs, beans, and legumes are rich sources of protein.
+                - Fats: Healthy fats, such as those found in avocados, nuts, and olive oil, provide long-lasting energy and are essential for hormone production.
+
+                2-Hydration:
+                - Staying hydrated is crucial for athletic performance. Water helps regulate body temperature, lubricate joints, and prevent dehydration during long workouts.
+                - For longer endurance activities, consider sports drinks that replenish electrolytes like sodium and potassium.
+
+                3-Pre-Workout Nutrition:
+                - Eat a balanced meal 1-2 hours before your workout, including carbs and protein for energy and muscle support.
+                - A quick snack, such as a banana with peanut butter, 30 minutes before a workout can also provide a quick energy boost.
+
+                4-Post-Workout Recovery:
+                - After exercise, aim to eat a meal with protein and carbs within 30-60 minutes to aid muscle recovery and replenish glycogen stores.
+                - A smoothie made with protein powder, fruits, and leafy greens is an excellent post-workout option.
+
+                By paying attention to your nutrition, you can improve endurance, strength, and recovery, ultimately enhancing your athletic performance.''',
+                'assets/images/nutrition.jpg', // Replace with image for Blog 2
+              ),
+            ),
+          );
+        },
+      ),
+      const SizedBox(height: 15),
+      blogCard(
+        'Advanced Strength Training Techniques',
+        'Explore advanced see more...',
+        'assets/images/advanced-strength-training.jpg', // Replace with your actual image path
+        () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BlogDetailScreen(
+                'Advanced Strength Training Techniques', 
+                '''As you progress in your fitness journey, you may want to incorporate advanced strength training techniques to continue building muscle and strength. Here are some key methods to consider:
+
+                1. Periodization:
+                Periodization involves cycling through different phases of training (e.g., strength, hypertrophy, and endurance) to allow for optimal recovery and prevent plateaus.
+                - Macrocycle: The longest cycle, typically lasting 6 months to a year.
+                - Mesocycle: A medium cycle, usually lasting 3-4 weeks, focusing on specific goals.
+                - Microcycle: The shortest cycle, lasting 1-2 weeks, and typically involves the highest intensity training.
+
+                2. Progressive Overload:
+                This technique involves gradually increasing the weight, reps, or sets in your workouts to force your muscles to adapt and grow stronger. It's a fundamental principle in building strength.
+
+                3. Hypertrophy Training:
+                To increase muscle size, focus on high-repetition sets (8-12 reps per set) with moderate weights. Compound exercises like squats, deadlifts, and bench presses are excellent for hypertrophy.
+
+                4. Supersets and Drop Sets:
+                - Supersets: Perform two exercises back-to-back with no rest in between. This can be done for opposing muscle groups (e.g., biceps and triceps) or the same muscle group.
+                - Drop Sets: Start with a heavy weight and gradually reduce the weight as you reach failure. This technique helps to push muscles beyond their normal fatigue point.
+
+                5. Recovery and Rest:
+                - Never underestimate the power of rest. Muscles grow during recovery, not during the workout itself. Make sure to get 7-8 hours of sleep each night and allow for 48 hours of rest between training the same muscle group.
+
+                By incorporating these advanced techniques into your workout routine, you can continue to build muscle and strength, pushing past plateaus and achieving your fitness goals more efficiently.''',
+                'assets/images/advanced-strength-training.jpg', // Replace with image for Blog 3
+              ),
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
 
   // Blog card widget
   Widget blogCard(String title, String description, String imageUrl, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        elevation: 5,
-        shape: RoundedRectangleBorder(
+  return GestureDetector(
+    onTap: onTap,
+    child: Card(
+      elevation: 5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Container(
+        height: 120, // Adjust card height
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Row(
+        child: Stack(
           children: [
+            // Background image
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: Image.asset(imageUrl, width: 100, height: 100, fit: BoxFit.cover),
+              child: Image.asset(
+                imageUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
             ),
-            const SizedBox(width: 10),
-            Expanded(
+            // Black overlay
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5), // Semi-transparent overlay
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            // Content on top of the overlay
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 5),
-                  Text(description, style: TextStyle(color: Colors.grey[700])),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class BlogDetailScreen extends StatelessWidget {
@@ -390,19 +500,86 @@ class BlogDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Image.asset(imageUrl),
-            const SizedBox(height: 10),
-            Text(content, style: TextStyle(fontSize: 16)),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, // Ensures alignment to the left
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0), // Adjust horizontal spacing
+                child: SizedBox(
+                  height: 300,
+                  width: double.infinity,
+                  child: Image.asset(
+                    imageUrl,
+                    fit: BoxFit.cover, // Adjust fit if you want the entire image visible
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Parse content for formatted display
+              ..._formatContent(content),
+            ],
+          ),
         ),
       ),
     );
   }
+
+  // Helper method to format the content with bold headings and regular paragraphs
+  List<Widget> _formatContent(String content) {
+    final List<Widget> widgets = [];
+    final lines = content.split('\n');
+
+    for (String line in lines) {
+      if (line.trim().isEmpty) continue;
+
+      // Check if the line is a heading (e.g., starts with - or a numbered list)
+      if (line.startsWith('- ')) {
+        widgets.add(Text(
+          line.substring(2).trim(), // Remove "- " from the start
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ));
+        widgets.add(const SizedBox(height: 10));
+      } else if (line.startsWith(RegExp(r'\d\.'))) {
+        widgets.add(Text(
+          line.trim(), // Handles numbered headings
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ));
+        widgets.add(const SizedBox(height: 10));
+      } else {
+        // Regular content
+        widgets.add(Text(
+          line.replaceAll('*', '').trim(), // Remove asterisks
+          style: TextStyle(
+            fontSize: 16,
+            height: 1.5,
+          ),
+        ));
+        widgets.add(const SizedBox(height: 10));
+      }
+    }
+    return widgets;
+  }
 }
+
+
+
 
 class LocalStorage {
   Future<void> writeData(String date, int totalSteps, double caloriesBurned, int duration) async {
