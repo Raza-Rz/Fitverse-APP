@@ -7,6 +7,7 @@ import 'package:fitverse/view/login/login_screen.dart';
 import 'package:fitverse/view/on_boarding/on_boarding_screen.dart';
 import 'package:fitverse/view/on_boarding/start_screen.dart';
 import 'package:fitverse/view/profile/complete_profile_screen.dart';
+import 'package:fitverse/view/signup/email_verification.dart';
 
 import 'package:fitverse/view/signup/signup_screen.dart';
 import 'package:fitverse/view/welcome/welcome_screen.dart';
@@ -29,4 +30,5 @@ final Map<String, WidgetBuilder> routes = {
 
   RefinedProfileScreen.routeName: (context) => const RefinedProfileScreen(),
   RefinedProfileScreen.routeName: (context) => const RefinedProfileScreen(),
+  EmailVerificationScreen.routeName: (context) => const EmailVerificationScreen(),
 };

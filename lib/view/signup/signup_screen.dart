@@ -26,46 +26,56 @@ class _SignupScreenState extends State<SignupScreen> {
   final RegExp passwordRegExp = RegExp(r'^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$');
 
   // Method to handle Firebase signup and storing additional user info
-  Future<void> _signup() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        print('Registering user...');
-        UserCredential userCredential = await FirebaseAuth.instance
-            .createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
-        print('User registered: ${userCredential.user!.email}');
+ Future<void> _signup() async {
+  if (_formKey.currentState!.validate()) {
+    try {
+      print('Registering user...');
+      // Create a new user with email and password
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+      print('User registered: ${userCredential.user!.email}');
 
-        User? user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          await user.sendEmailVerification();
-          print('Email verification sent to ${user.email}');
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Send email verification
+        await user.sendEmailVerification();
+        print('Email verification sent to ${user.email}');
 
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(userCredential.user!.uid)
-              .set({
-            'firstName': _firstNameController.text.trim(),
-            'lastName': _lastNameController.text.trim(),
-            'email': _emailController.text.trim(),
-            'isEmailVerified': false, // To track email verification status
-          });
-          print('User data stored in Firestore');
+        // Store additional user data in Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .set({
+          'firstName': _firstNameController.text.trim(),
+          'lastName': _lastNameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'isEmailVerified': false, // Track email verification status
+        });
+        print('User data stored in Firestore');
 
-          // Navigate to Email Verification Screen
-          // ignore: use_build_context_synchronously
+        // Safely navigate to the Email Verification Screen
+        if (mounted) {
           Navigator.pushNamed(context, EmailVerificationScreen.routeName);
           print('Navigating to Email Verification Screen');
         }
-      } on FirebaseAuthException catch (e) {
-        print('Error during signup: ${e.message}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Signup failed: ${e.message}')),
-        );
       }
+    } on FirebaseAuthException catch (e) {
+      print('Error during signup: ${e.message}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Signup failed: ${e.message}')),
+      );
+    } catch (e) {
+      print('Unknown error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An unknown error occurred')),
+      );
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
