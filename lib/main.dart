@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitverse/routes.dart';
 import 'package:fitverse/utils/app_colors.dart';
 import 'package:fitverse/view/dashboard/dashboard_screen.dart';
@@ -21,8 +22,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late Widget _initialScreen;
-  bool _isLoading = true;
+  Widget _initialScreen = const SplashScreen(); // Default to SplashScreen
 
   @override
   void initState() {
@@ -35,29 +35,20 @@ class _MyAppState extends State<MyApp> {
     bool seenOnboarding = prefs.getBool('seenOnboarding') ?? false;
     bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
-    // Decide which screen to show
     if (!seenOnboarding) {
       _initialScreen = const OnBoardingScreen();
     } else if (isLoggedIn) {
-      _initialScreen = const LoaderScreen(); // Show loader before Dashboard
+      _initialScreen = const DashboardLoader();
     } else {
       _initialScreen = const LoginScreen();
     }
 
-    setState(() {
-      _isLoading = false; // Loading complete
-    });
+    // Trigger a rebuild after determining the correct screen
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: SplashScreen(),
-      );
-    }
-
     return MaterialApp(
       title: 'Fitverse',
       debugShowCheckedModeBanner: false,
@@ -68,7 +59,7 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
         fontFamily: "Poppins",
       ),
-      home: _initialScreen,
+      home: _initialScreen, // Directly show the determined screen
     );
   }
 }
@@ -76,63 +67,70 @@ class _MyAppState extends State<MyApp> {
 class SplashScreen extends StatelessWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: SizedBox.expand(
-      child: Image.asset(
-        'assets/splash.png',
-        fit: BoxFit.cover, // Ensures the image scales and covers the entire screen
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SizedBox.expand(
+        child: Image.asset(
+          'assets/splash.png',
+          fit: BoxFit.cover, // Ensures the image scales and covers the entire screen
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
 
-class LoaderScreen extends StatefulWidget {
-  const LoaderScreen({Key? key}) : super(key: key);
+class DashboardLoader extends StatefulWidget {
+  const DashboardLoader({Key? key}) : super(key: key);
 
   @override
-  State<LoaderScreen> createState() => _LoaderScreenState();
+  State<DashboardLoader> createState() => _DashboardLoaderState();
 }
 
-class _LoaderScreenState extends State<LoaderScreen> {
+class _DashboardLoaderState extends State<DashboardLoader> {
   @override
   void initState() {
     super.initState();
-    _navigateToDashboard();
+    _autoLogin();
   }
 
-  Future<void> _navigateToDashboard() async {
-    // Ensure the loader is visible for at least 2 seconds
-    await Future.delayed(const Duration(seconds: 2));
+  Future<void> _autoLogin() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedEmail = prefs.getString('email');
+    String? savedPassword = prefs.getString('password');
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+    if (isLoggedIn && savedEmail != null && savedPassword != null) {
+      try {
+        // Attempt to sign in with Firebase
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: savedEmail,
+          password: savedPassword,
+        );
+
+        _navigateToScreen(const DashboardScreen());
+      } catch (e) {
+        print('Auto-login failed: $e');
+        _navigateToScreen(const LoginScreen());
+      }
+    } else {
+      _navigateToScreen(const LoginScreen());
+    }
+  }
+
+  void _navigateToScreen(Widget screen) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const DashboardScreen()),
+      MaterialPageRoute(builder: (context) => screen),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.whiteColor,
+    return const Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(
-              color: AppColors.primaryColor1,
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              "Loading Dashboard...",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
+        child: CircularProgressIndicator(),
       ),
     );
   }

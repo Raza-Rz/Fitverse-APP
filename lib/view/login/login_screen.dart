@@ -23,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isPasswordVisible = false;
   bool _isLoading = false;
   bool _rememberMe = false; // Remember Me state
-  final RegExp passwordRegExp = RegExp(r'^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$');
+  final RegExp passwordRegExp = RegExp(r'^(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,}$');
 
   @override
   void initState() {
@@ -40,35 +40,53 @@ Future<void> _loadSavedCredentials() async {
 
   if (savedRememberMe && savedEmail != null && savedPassword != null) {
     try {
-      // Automatically sign in the user using Firebase Auth
+      setState(() {
+        _isLoading = true; // Show spinner during auto-login
+      });
+
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: savedEmail,
         password: savedPassword,
       );
-      // Navigate to the Dashboard directly
+
       if (context.mounted) {
-        Navigator.pushNamed(context, DashboardScreen.routeName);
+        Navigator.pushReplacementNamed(context, DashboardScreen.routeName);
       }
     } catch (e) {
-      // Handle any errors during auto-login (e.g., network issues)
+      // Clear invalid credentials on error
+      await _clearSavedCredentials();
       print('Auto-login failed: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 }
 
+
+
   // Save email and password to SharedPreferences
-  Future<void> _saveCredentials() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (_rememberMe) {
-      await prefs.setString('email', _emailController.text);
-      await prefs.setString('password', _passwordController.text);
-      await prefs.setBool('remember_me', _rememberMe);
-    } else {
-      await prefs.remove('email');
-      await prefs.remove('password');
-      await prefs.setBool('remember_me', false);
-    }
+  // Save credentials to SharedPreferences
+Future<void> _saveCredentials() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  if (_rememberMe) {
+    await prefs.setString('email', _emailController.text);
+    await prefs.setString('password', _passwordController.text);
+    await prefs.setBool('remember_me', true);
+  } else {
+    await _clearSavedCredentials();
   }
+}
+
+// Clear credentials from SharedPreferences
+Future<void> _clearSavedCredentials() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('email');
+  await prefs.remove('password');
+  await prefs.setBool('remember_me', false);
+}
+
 
   // Method to handle Firebase login
   Future<void> _login() async {
@@ -95,7 +113,8 @@ Future<void> _loadSavedCredentials() async {
 
         // Navigate to the dashboard on successful login
         // ignore: use_build_context_synchronously
-        Navigator.pushNamed(context, DashboardScreen.routeName);
+        Navigator.pushReplacementNamed(context, DashboardScreen.routeName);
+
       } on FirebaseAuthException catch (e) {
         // Show error message if login fails
         String errorMessage;
@@ -292,12 +311,10 @@ Future<void> _loadSavedCredentials() async {
             ),
           ),
           if (_isLoading)
-            Container(
-              color: Colors.white.withOpacity(0.5),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
+  Container(
+    color: Colors.white.withOpacity(0.7),
+    child: const Center(child: CircularProgressIndicator()),
+  ),
         ],
       ),
     );
