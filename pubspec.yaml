@@ -59,6 +59,8 @@ dependencies:
   cloud_firestore: ^5.4.2
   google_generative_ai: ^0.4.6
   flutter_markdown: ^0.7.4+3
+  flutter_local_notifications: ^15.1.3
+  flutter_timezone: ^3.0.0
 # flutter_native_splash:
 #   color: "#ffffff"  # Background color for splash screen
 #   image: assets/splash.png  # Path to your splash image

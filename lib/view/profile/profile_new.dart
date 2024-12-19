@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitverse/utils/app_colors.dart';
 import 'package:fitverse/view/dashboard/dashboard_screen.dart';
+import 'package:fitverse/view/profile/setting-screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fitverse/view/profile/edit_profile.dart';
 import '../login/login_screen.dart';
@@ -172,9 +173,9 @@ class RefinedProfileScreen extends StatelessWidget {
           // menuItem(Icons.privacy_tip, 'Privacy Policy', () {
           //   Navigator.pushNamed(context, '/privacy');
           // }),
-          // menuItem(Icons.settings, 'Settings', () {
-          //   Navigator.pushNamed(context, '/settings');
-          // }),
+          menuItem(Icons.settings, 'Settings', () {
+          Navigator.pushNamed(context, SettingsScreen.routeName); // Navigate to Settings
+        }),
           // menuItem(Icons.help, 'Help', () {
           //   Navigator.pushNamed(context, '/help');
           // }),
