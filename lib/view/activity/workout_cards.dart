@@ -6,7 +6,7 @@ class ActivityScreen extends StatelessWidget {
     {
       'title': 'Chest & Abdominal',
       'subtitle': '05 Exercises',
-      'color': Colors.orangeAccent,
+      
       'imagePath': 'assets/images/chest.jpg',
       'workouts': [
         {
@@ -61,7 +61,7 @@ class ActivityScreen extends StatelessWidget {
     {
       'title': 'Back',
       'subtitle': '05 Exercises',
-      'color': Colors.lightBlue,
+      
       'imagePath': 'assets/images/back.jpg',
       'workouts': [
         {
@@ -115,7 +115,7 @@ class ActivityScreen extends StatelessWidget {
     {
       'title': 'Shoulder',
       'subtitle': '05 Exercises',
-      'color': Colors.lightBlue,
+      
       'imagePath': 'assets/images/shoulder.jpg',
       'workouts': [
         {
@@ -170,7 +170,7 @@ class ActivityScreen extends StatelessWidget {
     {
       'title': 'Arms Workout',
       'subtitle': '05 Exercises',
-      'color': Colors.orangeAccent,
+      
       'imagePath': 'assets/images/arm.jpg',
       'workouts': [
         {
@@ -224,7 +224,7 @@ class ActivityScreen extends StatelessWidget {
     {
       'title': 'Legs',
       'subtitle': '05 Exercises',
-      'color': Colors.lightBlue,
+      
       'imagePath': 'assets/images/legs.jpg',
       'workouts': [
         {
@@ -275,98 +275,21 @@ class ActivityScreen extends StatelessWidget {
       ],
     },
 
-    // Other categories ...
+   
   ];
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       automaticallyImplyLeading: false,
-  //       title: const Text('Activity'),
-  //       centerTitle: true,
-  //     ),
-  //     body: Padding(
-  //       padding: const EdgeInsets.all(12.0),
-  //       child: ListView.builder(
-  //         itemCount: workoutCategories.length,
-  //         itemBuilder: (context, index) {
-  //           final category = workoutCategories[index];
-  //           return GestureDetector(
-  //             onTap: () {
-  //               Navigator.push(
-  //                 context,
-  //                 MaterialPageRoute(
-  //                   builder: (context) => WorkoutCategoryScreen(
-  //                     title: category['title'],
-  //                     workoutList: category['workouts'],
-  //                   ),
-  //                 ),
-  //               );
-  //             },
-  //             child: Container(
-  //               height: 110,
-  //               margin: const EdgeInsets.symmetric(vertical: 8),
-  //               decoration: BoxDecoration(
-  //                 color: category['color'],
-  //                 borderRadius: BorderRadius.circular(10),
-  //               ),
-  //               child: Row(
-  //                 children: [
-  //                   Expanded(
-  //                     child: Padding(
-  //                       padding: const EdgeInsets.all(16.0),
-  //                       child: Column(
-  //                         mainAxisAlignment: MainAxisAlignment.center,
-  //                         crossAxisAlignment: CrossAxisAlignment.start,
-  //                         children: [
-  //                           Text(
-  //                             category['title'],
-  //                             style: const TextStyle(
-  //                               color: Colors.white,
-  //                               fontWeight: FontWeight.bold,
-  //                               fontSize: 18,
-  //                             ),
-  //                           ),
-  //                           const SizedBox(height: 4),
-  //                           Text(
-  //                             category['subtitle'],
-  //                             style: const TextStyle(
-  //                               color: Colors.white70,
-  //                               fontSize: 14,
-  //                             ),
-  //                           ),
-  //                         ],
-  //                       ),
-  //                     ),
-  //                   ),
-  //                   ClipRRect(
-  //                     borderRadius: const BorderRadius.horizontal(
-  //                         right: Radius.circular(10)),
-  //                     child: Image.asset(
-  //                       category['imagePath'],
-  //                       fit: BoxFit.cover,
-  //                       width: 100,
-  //                       height: double.infinity,
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //           );
-  //         },
-  //       ),
-  //     ),
-  //   );
-  // }
-
 
 @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Workouts'),
+        title: const Text('Workouts',
+        style: TextStyle(
+        color: Colors.black,
+         fontSize: 22,
+          fontWeight: FontWeight.bold,
+           ),
+           ),
         centerTitle: true,
       ),
       body: Padding(
@@ -447,7 +370,4 @@ class ActivityScreen extends StatelessWidget {
       ),
     );
   }
-
-
-
 }

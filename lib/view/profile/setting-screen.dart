@@ -1,8 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/timezone.dart' as tz;
+// import 'package:timezone/timezone.dart' as tz;
+// import 'package:timezone/data/latest.dart' as tzData;
+
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as tzData;
+import 'package:timezone/timezone.dart' as tz;
+
+
+Future<void> _checkAndRequestExactAlarmPermission() async {
+  PermissionStatus status = await Permission.notification.status;
+
+  if (!status.isGranted) {
+    // Request permission if not granted
+    await Permission.notification.request();
+  }
+
+  // Request SET_EXACT_ALARM permission
+  PermissionStatus alarmStatus = await Permission.sms.request();
+  if (alarmStatus.isDenied) {
+    print("Exact alarm permission denied.");
+  }
+}
 
 class SettingsScreen extends StatefulWidget {
   static String routeName = "/settings";
@@ -29,15 +50,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // Initialize time zone and local notifications
   void _initializeNotifications() async {
-    tzData.initializeTimeZones();
-    tz.setLocalLocation(tz.getLocation('America/New_York')); // Adjust as needed
+    // Initialize timezone data
+        tzData.initializeTimeZones();
 
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('app_icon');
-    final InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-    );
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+        try {
+          // Get the local timezone using flutter_timezone
+          final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+
+          // Set the timezone dynamically
+          tz.setLocalLocation(tz.getLocation(currentTimeZone));
+
+          print("Current Timezone: $currentTimeZone");
+        } catch (e) {
+          print("Error fetching timezone: $e");
+        }
   }
 
   // Load notification preferences from SharedPreferences
@@ -70,7 +96,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Settings"),
+        title: const Text("Settings",
+        style: TextStyle(
+        color: Colors.black,
+         fontSize: 22,
+          fontWeight: FontWeight.bold,
+           ),),
         backgroundColor: Colors.transparent,
       ),
       body: Padding(

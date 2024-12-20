@@ -120,20 +120,17 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   void _scrollToBottom() {
-  // Ensure this runs after the build cycle for accurate position data
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
-  });
-}
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
 
-
-  // Save messages to local storage
   Future<void> _saveMessages() async {
     final prefs = await SharedPreferences.getInstance();
     final data = _messages.map((message) {
@@ -145,7 +142,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     prefs.setString('chat_messages', jsonEncode(data));
   }
 
-  // Load messages from local storage
   Future<void> _loadMessages() async {
     final prefs = await SharedPreferences.getInstance();
     final data = prefs.getString('chat_messages');
@@ -157,7 +153,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     }
   }
 
-  // Delete messages older than 3 days
   Future<void> _deleteOldMessages() async {
     final now = DateTime.now();
     _messages.removeWhere((message) {
@@ -203,6 +198,85 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     );
   }
 
+  Widget _buildInputField() {
+  final List<String> fitnessSuggestions = [
+    "What's a good workout for weight loss?",
+    "Give me a 15-minute home workout routine.",
+    "What should I eat for muscle gain?",
+    "How can I improve my running stamina?",
+    "What are the best exercises for core strength?",
+  ];
+
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        child: Row(
+          children: fitnessSuggestions.map((suggestion) {
+            return GestureDetector(
+              onTap: () {
+                _sendMessage(suggestion); // Directly send the message
+              },
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor1,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Text(
+                  suggestion,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+      Container(
+        color: Colors.grey.shade100,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                decoration: InputDecoration(
+                  hintText: 'Type your message...',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.send, color: AppColors.primaryColor1),
+              onPressed: () {
+                final text = _controller.text.trim();
+                if (text.isNotEmpty) {
+                  _controller.clear();
+                  _sendMessage(text);
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -233,46 +307,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               bottom: 70,
               right: 20,
               child: FloatingActionButton(
-                  mini: true,
-                  onPressed: _scrollToBottom,
-                  child: const Icon(Icons.arrow_downward),
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInputField() {
-    return Container(
-      color: Colors.grey.shade100,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                hintText: 'Type your message...',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                onPressed: _scrollToBottom,
+                child: const Icon(Icons.arrow_downward),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.send, color: AppColors.primaryColor1),
-            onPressed: () {
-              final text = _controller.text;
-              _controller.clear();
-              _sendMessage(text);
-            },
-          ),
         ],
       ),
     );

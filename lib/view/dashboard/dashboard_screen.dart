@@ -9,6 +9,23 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../home/home_screen.dart';
 
+
+
+Future<void> _checkAndRequestExactAlarmPermission() async {
+  PermissionStatus status = await Permission.notification.status;
+
+  if (!status.isGranted) {
+    // Request permission if not granted
+    await Permission.notification.request();
+  }
+
+  // Request SET_EXACT_ALARM permission
+  PermissionStatus alarmStatus = await Permission.sms.request();
+  if (alarmStatus.isDenied) {
+    print("Exact alarm permission denied.");
+  }
+}
+
 class DashboardScreen extends StatefulWidget {
   static String routeName = "/DashboardScreen";
 
