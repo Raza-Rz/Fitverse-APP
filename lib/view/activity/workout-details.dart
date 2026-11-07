@@ -151,7 +151,7 @@ class WorkoutCategoryScreen extends StatelessWidget {
                   // Duration
                   Text(
                     'Duration: $duration',
-                    style: const TextStyle(fontSize: 14),
+                    style: const TextStyle(fontSize: 14,fontWeight: FontWeight.bold),
                   ),
 
                   const SizedBox(height: 8),
@@ -159,7 +159,7 @@ class WorkoutCategoryScreen extends StatelessWidget {
                   // Sets
                   Text(
                     'Sets: $sets',
-                    style: const TextStyle(fontSize: 14),
+                    style: const TextStyle(fontSize: 14,fontWeight: FontWeight.bold),
                   ),
 
                   const SizedBox(height: 8),
@@ -167,7 +167,7 @@ class WorkoutCategoryScreen extends StatelessWidget {
                   // Reps
                   Text(
                     'Reps: $reps',
-                    style: const TextStyle(fontSize: 14),
+                    style: const TextStyle(fontSize: 14,fontWeight: FontWeight.bold),
                   ),
 
                   const SizedBox(height: 8),

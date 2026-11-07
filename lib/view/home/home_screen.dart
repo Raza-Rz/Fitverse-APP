@@ -89,7 +89,25 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _requestPermissions();
+    _checkNotificationPermission();
     _loadDataForSelectedDay();
+  }
+   Future<void> _checkNotificationPermission() async {
+    if (Platform.isIOS || Platform.isAndroid) {
+      final permissionStatus = await Permission.notification.status;
+      if (!permissionStatus.isGranted) {
+        await _requestNotificationPermission();
+      }
+    }
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    final status = await Permission.notification.request();
+    if (status.isGranted) {
+      print('Notification Permission granted');
+    } else {
+      print('Notification Permission denied');
+    }
   }
 
   Future<void> _requestPermissions() async {

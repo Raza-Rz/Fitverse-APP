@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:fitverse/view/activity/workout-details.dart';
 
-class ActivityScreen extends StatelessWidget {
+class ActivityScreen extends StatefulWidget {
+  @override
+  _ActivityScreenState createState() => _ActivityScreenState();
+}
+
+class _ActivityScreenState extends State<ActivityScreen> with SingleTickerProviderStateMixin {
+  // TabController to manage the tabs
+  late TabController _tabController;
+
+  // The workout categories (same as the current ones)
   final List<Map<String, dynamic>> workoutCategories = [
-    {
+     {
       'title': 'Chest & Abdominal',
       'subtitle': '05 Exercises',
       
@@ -275,99 +284,151 @@ class ActivityScreen extends StatelessWidget {
       ],
     },
 
-   
+    // Other categories ...
   ];
 
-@override
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this); // 3 tabs (Beginner, Intermediate, Advanced)
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Workouts',
-        style: TextStyle(
-        color: Colors.black,
-         fontSize: 22,
-          fontWeight: FontWeight.bold,
-           ),
-           ),
+        title: const Text(
+          'Workouts',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Beginner'),
+            Tab(text: 'Intermediate'),
+            Tab(text: 'Advanced'),
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: ListView.builder(
-          itemCount: workoutCategories.length,
-          itemBuilder: (context, index) {
-            final category = workoutCategories[index];
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => WorkoutCategoryScreen(
-                      title: category['title'],
-                      workoutList: category['workouts'],
-                    ),
-                  ),
-                );
-              },
-              child: Container(
-                height: 120,
-                margin: const EdgeInsets.symmetric(vertical: 6),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Stack(
-                  children: [
-                    // Background image
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.asset(
-                        category['imagePath'],
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                      ),
-                    ),
-                    // Black overlay
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.4), // Semi-transparent overlay
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    // Foreground content
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            category['title'],
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            category['subtitle'],
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildWorkoutList('Beginner'),
+            _buildWorkoutList('Intermediate'),
+            _buildWorkoutList('Advanced'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Function to adjust the intensity (sets & reps) based on selected tab level
+  Map<String, String> _adjustIntensity(Map<String, String> workout, String level) {
+    Map<String, String> adjustedWorkout = Map.from(workout);
+
+    switch (level) {
+      case 'Beginner':
+        adjustedWorkout['sets'] = '3 sets';
+        adjustedWorkout['reps'] = '10 reps';
+        break;
+      case 'Intermediate':
+        adjustedWorkout['sets'] = '4 sets';
+        adjustedWorkout['reps'] = '15 reps';
+        break;
+      case 'Advanced':
+        adjustedWorkout['sets'] = '5 sets';
+        adjustedWorkout['reps'] = '20 reps';
+        break;
+    }
+
+    return adjustedWorkout;
+  }
+
+  // Function to build the workout list for each tab
+  Widget _buildWorkoutList(String level) {
+    return ListView.builder(
+      itemCount: workoutCategories.length,
+      itemBuilder: (context, index) {
+        final category = workoutCategories[index];
+
+        // For each workout in the category, adjust intensity (sets & reps)
+        final adjustedWorkouts = category['workouts'].map<Map<String, String>>((workout) {
+          return _adjustIntensity(workout, level); // Adjust intensity based on level
+        }).toList();
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => WorkoutCategoryScreen(
+                  title: category['title'],
+                  workoutList: adjustedWorkouts,
                 ),
               ),
             );
           },
-        ),
-      ),
+          child: Container(
+            height: 120,
+            margin: const EdgeInsets.symmetric(vertical: 6),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset(
+                    category['imagePath'],
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.4),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        category['title'],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        category['subtitle'],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
